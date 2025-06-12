@@ -40,6 +40,8 @@ const CameraDetector: React.FC = () => {
     swingState,
     cameraEnabled,
     detectionActive,
+    selectedCameraDeviceId, // Added
+    handedness,             // Added
     startSwing,
     recordTransition,
     finishSwing,
@@ -143,20 +145,34 @@ const CameraDetector: React.FC = () => {
     
     const landmarks = results.poseLandmarks
     
-    // Using right wrist for tracking (right-handed golfer)
-    const rightWrist = landmarks[POSE_LANDMARKS.RIGHT_WRIST]
-    const rightShoulder = landmarks[POSE_LANDMARKS.RIGHT_SHOULDER]
+    // Determine landmarks based on handedness
+    const wristLandmark = handedness === 'left' ? POSE_LANDMARKS.LEFT_WRIST : POSE_LANDMARKS.RIGHT_WRIST
+    const shoulderLandmark = handedness === 'left' ? POSE_LANDMARKS.LEFT_SHOULDER : POSE_LANDMARKS.RIGHT_SHOULDER
+
+    const targetWrist = landmarks[wristLandmark]
+    const targetShoulder = landmarks[shoulderLandmark]
     
     // Check if landmarks have sufficiently high confidence
-    if (rightWrist.visibility < DETECTION_CONFIDENCE || 
-        rightShoulder.visibility < DETECTION_CONFIDENCE) {
+    if (!targetWrist || !targetShoulder ||
+        targetWrist.visibility < DETECTION_CONFIDENCE ||
+        targetShoulder.visibility < DETECTION_CONFIDENCE) {
       return
     }
     
     // Get position relative to the shoulder
+    // For a right-handed golfer, a backswing moves wrist to the left (negative x relative to shoulder)
+    // For a left-handed golfer, a backswing moves wrist to the right (positive x relative to shoulder)
+    // We can normalize this by multiplying by -1 for left-handers if needed, or adjust thresholds.
+    // Current thresholds (BACKSWING_THRESHOLD, DOWNSWING_THRESHOLD) are positive, expecting decrease in X for backswing.
+    // Let's adjust wristPos.x so that for both handedness, backswing is a negative/decreasing X value.
+    let wristXRelativeToShoulder = targetWrist.x - targetShoulder.x
+    if (handedness === 'left') {
+      wristXRelativeToShoulder = -wristXRelativeToShoulder // Invert X-axis for left-handed
+    }
+
     const wristPos = {
-      x: rightWrist.x - rightShoulder.x, 
-      y: rightWrist.y - rightShoulder.y
+      x: wristXRelativeToShoulder,
+      y: targetWrist.y - targetShoulder.y // Y-axis remains the same
     }
     
     // Handle different swing states
@@ -310,11 +326,11 @@ const CameraDetector: React.FC = () => {
           ref={webcamRef}
           audio={false}
           mirrored={true}
-          videoConstraints={{
-            facingMode: 'user',
-            width: { ideal: 640 },
-            height: { ideal: 360 }
-          }}
+          videoConstraints={
+            selectedCameraDeviceId
+              ? { deviceId: { exact: selectedCameraDeviceId }, width: { ideal: 640 }, height: { ideal: 360 } }
+              : { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 360 } }
+          }
           className="w-full"
         />
         <div className="absolute top-2 right-2">

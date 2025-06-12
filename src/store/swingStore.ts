@@ -30,6 +30,10 @@ interface SwingStore {
   // Camera detection
   cameraEnabled: boolean
   detectionActive: boolean
+
+  // Settings
+  selectedCameraDeviceId: string | null
+  handedness: 'left' | 'right'
   
   // Actions
   setSwingState: (state: SwingState) => void
@@ -40,6 +44,8 @@ interface SwingStore {
   setShowHistory: (show: boolean) => void
   setCameraEnabled: (enabled: boolean) => void
   setDetectionActive: (active: boolean) => void
+  setSelectedCameraDeviceId: (deviceId: string | null) => void
+  setHandedness: (handedness: 'left' | 'right') => void
   
   // Manual time setting (for test or fallback)
   setBackswingTime: (time: number) => void
@@ -68,6 +74,8 @@ export const useSwingStore = create<SwingStore>()(
       showHistory: false,
       cameraEnabled: false,
       detectionActive: false,
+      selectedCameraDeviceId: null,
+      handedness: 'right',
       
       // Actions
       setSwingState: (state) => set({ swingState: state }),
@@ -128,6 +136,8 @@ export const useSwingStore = create<SwingStore>()(
       }),
       
       setDetectionActive: (active) => set({ detectionActive: active }),
+      setSelectedCameraDeviceId: (deviceId) => set({ selectedCameraDeviceId: deviceId }),
+      setHandedness: (handedness) => set({ handedness: handedness }),
       
       // Manual time setting (for testing or fallback)
       setBackswingTime: (time) => set({ backswingTime: time }),
