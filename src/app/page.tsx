@@ -1,6 +1,7 @@
 'use client'
 
-import TempoTrainer from "../components/TempoTrainer";
+import SwingDisplay from "../components/SwingDisplay";
+import CameraDetector from "../components/CameraDetector";
 
 export default function Home() {
   return (
@@ -13,7 +14,14 @@ export default function Home() {
           Perfect your golf swing with the ideal 3:1 ratio
         </p>
       </header>
-      <TempoTrainer />
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <CameraDetector />
+        </div>
+        <div>
+          <SwingDisplay />
+        </div>
+      </div>
     </main>
   );
 }
