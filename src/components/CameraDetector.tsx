@@ -397,12 +397,13 @@ const CameraDetector = () => {
     return (
       <Alert 
         severity="error" 
-        sx={{ borderRadius: 2, my: 2 }}
+        sx={{ borderRadius: 3, my: 2 }}
         action={
           <Button 
             color="inherit" 
             size="small"
             onClick={() => setCameraEnabled(false)}
+            sx={{ textTransform: 'none', fontWeight: 500 }}
           >
             Dismiss
           </Button>
@@ -415,9 +416,9 @@ const CameraDetector = () => {
   
   if (isLoading) {
     return (
-      <Box sx={{ textAlign: 'center', p: 4 }}>
+      <Box sx={{ textAlign: 'center', p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <CircularProgress size={40} thickness={4} color="primary" />
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontWeight: 500 }}>
           Loading pose detection...
         </Typography>
       </Box>
@@ -428,12 +429,13 @@ const CameraDetector = () => {
     return (
       <Alert 
         severity="error" 
-        sx={{ borderRadius: 2, my: 2 }}
+        sx={{ borderRadius: 3, my: 2 }}
         action={
           <Button 
             color="inherit" 
             size="small"
             onClick={() => setCameraEnabled(false)}
+            sx={{ textTransform: 'none', fontWeight: 500 }}
           >
             Dismiss
           </Button>
@@ -447,23 +449,24 @@ const CameraDetector = () => {
   return (
     <Box sx={{ my: 3, position: 'relative' }}>
       <Paper 
-        elevation={2} 
+        elevation={1} 
         sx={{ 
-          borderRadius: 2,
+          borderRadius: 6,
           overflow: 'hidden',
-          border: detectionActive ? `2px solid ${theme.palette.success.main}` : 'none',
-          position: 'relative'
+          border: detectionActive ? `2px solid ${theme.palette.primary.main}` : '1px solid rgba(61,131,97,0.1)',
+          position: 'relative',
+          boxShadow: detectionActive ? `0 8px 16px rgba(61,131,97,0.2)` : 'none'
         }}
       >
         <Webcam
           ref={webcamRef}
           audio={false}
           mirrored={true}
-          videoConstraints={
-            selectedCameraDeviceId
-              ? { deviceId: { exact: selectedCameraDeviceId }, width: { ideal: 640 }, height: { ideal: 360 } }
-              : { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 360 } }
-          }
+          videoConstraints={{
+            ...(selectedCameraDeviceId ? { deviceId: { exact: selectedCameraDeviceId } } : { facingMode: 'user' }),
+            width: { ideal: 640 },
+            height: { ideal: 360 }
+          }}
           style={{ width: '100%', display: 'block' }}
         />
         <Box 
@@ -476,7 +479,7 @@ const CameraDetector = () => {
         >
           <Chip
             size="small"
-            color={detectionActive ? "success" : "default"}
+            color={detectionActive ? "primary" : "default"}
             label={detectionActive ? "Active" : "Inactive"}
             icon={<FiberManualRecord sx={{ 
               fontSize: 12,
@@ -487,6 +490,12 @@ const CameraDetector = () => {
                 '100%': { opacity: 1 },
               }
             }} />}
+            sx={{ 
+              fontWeight: 500,
+              '& .MuiChip-label': {
+                px: 1
+              }
+            }}
           />
         </Box>
       </Paper>
@@ -494,20 +503,33 @@ const CameraDetector = () => {
       <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: 'space-between' }}>
         <Button
           variant={detectionActive ? "outlined" : "contained"}
-          color={detectionActive ? "error" : "success"}
+          color={detectionActive ? "error" : "primary"}
           onClick={handleToggleDetection}
           startIcon={detectionActive ? <Stop /> : <PlayArrow />}
-          size="medium"
+          size="large"
+          sx={{
+            borderRadius: 100,
+            px: 4,
+            py: 1.5,
+            fontWeight: 600,
+            textTransform: 'none',
+            boxShadow: detectionActive ? 'none' : '0 6px 16px rgba(61,131,97,0.2)'
+          }}
         >
-          {detectionActive ? 'Stop Detection' : 'Start Detection'}
+          {detectionActive ? 'Stop' : 'Start Recording'}
         </Button>
         
         <Button
-          variant="outlined"
+          variant="text"
           color="inherit"
           startIcon={<VideocamOff />}
           onClick={() => setCameraEnabled(false)}
           size="medium"
+          sx={{
+            fontWeight: 500,
+            textTransform: 'none',
+            opacity: 0.7
+          }}
         >
           Hide Camera
         </Button>
@@ -517,17 +539,18 @@ const CameraDetector = () => {
         variant="outlined"
         sx={{ 
           mt: 2, 
-          p: 1.5, 
-          borderRadius: 1,
-          bgcolor: theme.palette.mode === 'light' ? 'grey.50' : 'grey.900'  
+          p: 3, 
+          borderRadius: 4,
+          bgcolor: theme.palette.mode === 'light' ? 'rgba(61,131,97,0.05)' : 'rgba(61,131,97,0.1)',
+          border: `1px solid rgba(61,131,97,0.1)`
         }}
       >
-        <Typography variant="caption" color="text.secondary" component="div">
-          <Box component="p" sx={{ mb: 0.5, fontWeight: 'medium' }}>
+        <Typography variant="body2" color="text.secondary" component="div">
+          <Box component="p" sx={{ mb: 0.5, fontWeight: 500 }}>
             Position yourself so your full upper body is visible.
           </Box>
           <Box component="p" sx={{ m: 0 }}>
-            Make your backswing and downswing at normal speed.
+            Start the backswing on the first beep, and start the downswing on the second beep.
           </Box>
         </Typography>
       </Paper>

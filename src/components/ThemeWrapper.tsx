@@ -13,29 +13,29 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-// Primary colors from the image (deep blue gradient)
-const primaryBlue = '#0a2472';
-const lightBlue = '#2671e9';
-const accentBlue = '#009cff';
+// Primary colors from the image (green palette)
+const primaryGreen = '#3D8361';
+const lightGreen = '#4FA076';
+const accentGreen = '#2D6A4F';
 
 // Create a theme instance
 const createAppTheme = (mode: PaletteMode) => createTheme({
   palette: {
     mode,
     primary: {
-      main: primaryBlue,
-      light: lightBlue,
+      main: primaryGreen,
+      light: lightGreen,
     },
     secondary: {
-      main: accentBlue,
+      main: accentGreen,
     },
     background: {
-      default: mode === 'dark' ? '#0a1929' : '#f0f7ff',
-      paper: mode === 'dark' ? '#162231' : '#ffffff',
+      default: mode === 'dark' ? '#1C1C1C' : '#FFFFFF',
+      paper: mode === 'dark' ? '#282828' : '#FFFFFF',
     },
     text: {
-      primary: mode === 'dark' ? '#ffffff' : '#0a2472',
-      secondary: mode === 'dark' ? '#a0b4c8' : '#4a6288',
+      primary: mode === 'dark' ? '#FFFFFF' : '#333333',
+      secondary: mode === 'dark' ? '#CCCCCC' : '#666666',
     },
   },
   typography: {
@@ -63,7 +63,7 @@ const createAppTheme = (mode: PaletteMode) => createTheme({
     },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 24,
   },
   components: {
     MuiPaper: {
@@ -71,41 +71,41 @@ const createAppTheme = (mode: PaletteMode) => createTheme({
         root: {
           backgroundImage: 'none',
           boxShadow: mode === 'dark' 
-            ? '0 8px 24px rgba(0,0,0,0.4)' 
-            : '0 8px 24px rgba(25,118,210,0.1)',
-          borderRadius: 16,
+            ? '0 8px 24px rgba(0,0,0,0.3)' 
+            : '0 8px 24px rgba(61,131,97,0.1)',
+          borderRadius: 24,
           border: mode === 'dark' 
-            ? '1px solid rgba(255,255,255,0.1)' 
-            : '1px solid rgba(25,118,210,0.08)',
+            ? '1px solid rgba(255,255,255,0.08)' 
+            : '1px solid rgba(61,131,97,0.08)',
         },
         elevation1: {
-          backdropFilter: 'blur(12px)',
+          backdropFilter: 'blur(8px)',
           backgroundColor: mode === 'dark' 
-            ? 'rgba(22,34,49,0.8)' 
-            : 'rgba(255,255,255,0.9)',
+            ? 'rgba(40,40,40,0.8)' 
+            : 'rgba(255,255,255,0.95)',
         },
         elevation3: {
-          backdropFilter: 'blur(12px)',
+          backdropFilter: 'blur(8px)',
           backgroundColor: mode === 'dark' 
-            ? 'rgba(22,34,49,0.8)' 
-            : 'rgba(255,255,255,0.9)',
+            ? 'rgba(40,40,40,0.8)' 
+            : 'rgba(255,255,255,0.95)',
         }
       },
     },
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 100,
           fontWeight: 600,
           textTransform: 'none',
-          padding: '10px 20px',
+          padding: '12px 24px',
         },
         contained: {
-          boxShadow: '0 4px 16px rgba(25,118,210,0.3)',
-          background: `linear-gradient(135deg, ${lightBlue}, ${primaryBlue})`,
+          boxShadow: '0 4px 16px rgba(61,131,97,0.2)',
+          background: primaryGreen,
           '&:hover': {
-            background: `linear-gradient(135deg, ${accentBlue}, ${lightBlue})`,
-            boxShadow: '0 6px 20px rgba(25,118,210,0.4)',
+            background: lightGreen,
+            boxShadow: '0 6px 20px rgba(61,131,97,0.3)',
           },
         },
       },
@@ -113,7 +113,7 @@ const createAppTheme = (mode: PaletteMode) => createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: `linear-gradient(90deg, ${primaryBlue}, ${lightBlue})`,
+          background: primaryGreen,
           boxShadow: 'none',
         },
       },
@@ -132,13 +132,13 @@ const createAppTheme = (mode: PaletteMode) => createTheme({
         root: {
           height: 8,
           '& .MuiSlider-track': {
-            background: `linear-gradient(90deg, ${accentBlue}, ${lightBlue})`,
+            background: `linear-gradient(90deg, ${accentGreen}, ${primaryGreen})`,
             border: 'none',
           },
           '& .MuiSlider-thumb': {
-            boxShadow: `0 0 0 2px ${primaryBlue}`,
+            boxShadow: `0 0 0 2px ${primaryGreen}`,
             '&:hover, &.Mui-active': {
-              boxShadow: `0 0 0 3px ${lightBlue}`,
+              boxShadow: `0 0 0 3px ${lightGreen}`,
             },
           },
         },

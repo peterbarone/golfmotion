@@ -1,12 +1,28 @@
-import React, { useEffect, useState } from 'react'
-import { useSwingStore } from '../store/swingStore'
+import React, { useEffect, useState } from 'react';
+import { useSwingStore } from '../store/swingStore';
+import { 
+  Box, 
+  Typography, 
+  FormControl, 
+  FormControlLabel, 
+  FormLabel, 
+  MenuItem,
+  Radio, 
+  RadioGroup, 
+  Select, 
+  useTheme,
+  CircularProgress,
+  Alert,
+  InputLabel
+} from '@mui/material';
 
 interface DeviceInfo {
-  deviceId: string
-  label: string
+  deviceId: string;
+  label: string;
 }
 
 export const Settings: React.FC = () => {
+  const theme = useTheme();
   const {
     selectedCameraDeviceId,
     handedness,
@@ -49,7 +65,7 @@ export const Settings: React.FC = () => {
     getVideoDevices()
   }, [selectedCameraDeviceId, setSelectedCameraDeviceId]) // Dependency array needs thought
 
-  const handleCameraChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCameraChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSelectedCameraDeviceId(event.target.value || null)
   }
 
@@ -58,64 +74,93 @@ export const Settings: React.FC = () => {
   }
 
   return (
-    <div className="p-4 bg-gray-800 text-white rounded-lg shadow-xl max-w-md mx-auto">
-      <h2 className="text-2xl font-semibold mb-6 text-center text-teal-400">Settings</h2>
-
+    <Box sx={{ width: '100%' }}>
       {/* Camera Selection */}
-      <div className="mb-6">
-        <label htmlFor="camera-select" className="block text-sm font-medium text-gray-300 mb-1">
-          Select Camera
-        </label>
-        {devicesLoading && <p className="text-sm text-gray-400">Loading cameras...</p>}
-        {devicesError && <p className="text-sm text-red-400">{devicesError}</p>}
-        {!devicesLoading && !devicesError && videoDevices.length === 0 && (
-          <p className="text-sm text-yellow-400">No cameras found.</p>
-        )}
-        {!devicesLoading && !devicesError && videoDevices.length > 0 && (
-          <select
-            id="camera-select"
-            value={selectedCameraDeviceId || ''}
-            onChange={handleCameraChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md"
-          >
-            <option value="">-- Select a Camera --</option>
-            {videoDevices.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      <Box sx={{ mb: 4 }}>
+        <FormControl fullWidth variant="outlined" sx={{ mb: 1 }}>
+          <InputLabel id="camera-select-label">Select Camera</InputLabel>
+          {devicesLoading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <CircularProgress size={20} sx={{ mr: 2 }} />
+              <Typography variant="body2" color="text.secondary">Loading cameras...</Typography>
+            </Box>
+          ) : devicesError ? (
+            <Alert severity="error" sx={{ mt: 1, borderRadius: 2 }}>{devicesError}</Alert>
+          ) : videoDevices.length === 0 ? (
+            <Alert severity="warning" sx={{ mt: 1, borderRadius: 2 }}>No cameras found.</Alert>
+          ) : (
+            <Select
+              labelId="camera-select-label"
+              id="camera-select"
+              value={selectedCameraDeviceId || ''}
+              onChange={handleCameraChange}
+              label="Select Camera"
+              sx={{ 
+                mt: 1, 
+                borderRadius: 2,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.palette.divider
+                }
+              }}
+            >
+              <MenuItem value="">-- Select a Camera --</MenuItem>
+              {videoDevices.map((device) => (
+                <MenuItem key={device.deviceId} value={device.deviceId}>
+                  {device.label}
+                </MenuItem>
+              ))}
+            </Select>
+          )}
+        </FormControl>
+      </Box>
 
       {/* Handedness Selection */}
-      <div className="mb-4">
-        <span className="block text-sm font-medium text-gray-300 mb-2">Handedness</span>
-        <div className="flex items-center space-x-4">
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="radio"
-              name="handedness"
-              value="left"
-              checked={handedness === 'left'}
-              onChange={handleHandednessChange}
-              className="form-radio h-4 w-4 text-teal-500 bg-gray-700 border-gray-600 focus:ring-teal-500"
+      <Box sx={{ mb: 3 }}>
+        <FormControl component="fieldset">
+          <FormLabel component="legend" sx={{ 
+            color: 'text.primary', 
+            fontWeight: 500,
+            mb: 1
+          }}>
+            Handedness
+          </FormLabel>
+          <RadioGroup
+            row
+            name="handedness"
+            value={handedness}
+            onChange={handleHandednessChange}
+          >
+            <FormControlLabel 
+              value="left" 
+              control={
+                <Radio 
+                  sx={{ 
+                    color: theme.palette.primary.main,
+                    '&.Mui-checked': {
+                      color: theme.palette.primary.main
+                    }
+                  }} 
+                />
+              } 
+              label="Left" 
             />
-            <span className="text-sm text-gray-200">Left</span>
-          </label>
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="radio"
-              name="handedness"
-              value="right"
-              checked={handedness === 'right'}
-              onChange={handleHandednessChange}
-              className="form-radio h-4 w-4 text-teal-500 bg-gray-700 border-gray-600 focus:ring-teal-500"
+            <FormControlLabel 
+              value="right" 
+              control={
+                <Radio 
+                  sx={{ 
+                    color: theme.palette.primary.main,
+                    '&.Mui-checked': {
+                      color: theme.palette.primary.main
+                    }
+                  }} 
+                />
+              } 
+              label="Right" 
             />
-            <span className="text-sm text-gray-200">Right</span>
-          </label>
-        </div>
-      </div>
-    </div>
+          </RadioGroup>
+        </FormControl>
+      </Box>
+    </Box>
   )
 }

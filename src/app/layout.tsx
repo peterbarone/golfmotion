@@ -13,8 +13,9 @@ export const metadata: Metadata = {
   description: 'Analyze and improve your golf swing tempo',
 }
 
-// Import the client component
+// Import the client components
 import ThemeWrapper from '../components/ThemeWrapper'
+import BottomNavigation from '../components/BottomNavigation'
 
 export default function RootLayout({
   children,
@@ -31,7 +32,11 @@ export default function RootLayout({
       </head>
       <body className={roboto.className}>
         <ThemeWrapper>
-          {children}
+          {/* Main content area with padding to accommodate bottom navigation */}
+          <div style={{ paddingBottom: '56px' }}>
+            {children}
+          </div>
+          <BottomNavigation />
         </ThemeWrapper>
       </body>
     </html>

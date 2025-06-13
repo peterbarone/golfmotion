@@ -42,212 +42,110 @@ export default function Home() {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a2472, #2671e9)',
+      background: '#ffffff',
       backgroundSize: 'cover',
       backgroundAttachment: 'fixed',
       py: 6,
-      position: 'relative',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: 'radial-gradient(circle at 30% 70%, rgba(0, 156, 255, 0.2) 0%, transparent 40%), radial-gradient(circle at 70% 30%, rgba(38, 113, 233, 0.2) 0%, transparent 40%)',
-        pointerEvents: 'none',
-      }
+      position: 'relative'
     }}>
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <Paper elevation={3} sx={{ 
+      <Container maxWidth="lg">
+        <Box sx={{ 
           p: 4, 
           mb: 5, 
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at top right, rgba(0, 156, 255, 0.1), transparent 70%)',
-            zIndex: 0,
-          },
+          maxWidth: '700px',
+          mx: 'auto'
         }}>
           <Box sx={{ position: 'relative', zIndex: 2 }}>
-            <Typography variant="h3" component="h1" gutterBottom
-              sx={{ 
-                fontWeight: 'bold',
-                background: 'linear-gradient(90deg, #ffffff, #a0d7ff)', 
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: 1,
-              }}
-            >
-              TempoPro Golf
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: 'text.secondary', mb: 3, maxWidth: '500px', mx: 'auto' }}>
-              Your future swing can be bright! Record and analyze your tempo to improve performance
-            </Typography>
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ 
+                width: '80px', 
+                height: '80px', 
+                borderRadius: '50%', 
+                bgcolor: 'primary.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2
+              }}>
+                {/* Golf swing icon - using golfsil.png */}
+                <Box 
+                  component="img"
+                  src="/golfsil.png"
+                  alt="Golf Swing"
+                  sx={{ width: '60px', height: '60px' }}
+                />
+              </Box>
+              <Typography variant="h3" component="h1" gutterBottom
+                sx={{ 
+                  fontWeight: 'bold',
+                  color: '#333333',
+                  mb: 1
+                }}
+              >
+                Golf Motion
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: 'text.secondary', mb: 5, maxWidth: '500px', mx: 'auto' }}>
+                Master your swing tempo
+              </Typography>
+            </Box>
           </Box>
-        </Paper>
-
-        {/* Settings Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-          <Button 
-            variant="contained" 
-            startIcon={<SettingsIcon />}
-            onClick={() => setShowSettings(!showSettings)}
-            sx={{ 
-              px: 4,
-              py: 1.5,
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(4px)',
-                borderRadius: 'inherit',
-                zIndex: -1,
-              }
-            }}
-          >
-            {showSettings ? 'Hide Settings' : 'Settings'}
-          </Button>
         </Box>
 
-        {/* Settings Panel */}
-        {showSettings && (
-          <Paper elevation={3} sx={{ 
-            p: 4, 
-            mb: 5, 
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-            position: 'relative',
-            overflow: 'hidden',
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              top: '-50%',
-              right: '-50%',
-              width: '200px',
-              height: '200px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(38, 113, 233, 0.2) 0%, transparent 70%)',
-              zIndex: 0,
-            },
-          }}>
-            <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Typography variant="h5" gutterBottom sx={{ 
-                fontWeight: 600, 
-                color: '#fff',
-                mb: 3
-              }}>
-                Settings
-              </Typography>
-              <Settings />
-            </Box>
-          </Paper>
-        )}
-
-        {/* Metronome Component */}
-        <Paper elevation={3} sx={{ 
-          p: 4, 
-          mb: 5, 
-          background: 'rgba(255, 255, 255, 0.05)', 
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: '-30px',
-            left: '-30px',
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(0, 156, 255, 0.15) 0%, transparent 70%)',
-            zIndex: 0,
-          },
-        }}>
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Metronome />
+        {/* Main Action Buttons */}
+        <Stack spacing={2} sx={{ mb: 4 }}>
+          {/* Practice with Audio Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={() => router.push('/practice-audio')}
+              sx={{ 
+                px: 6,
+                py: 1.5,
+                fontSize: '1.1rem',
+                minWidth: '280px',
+                fontWeight: 'bold'
+              }}
+            >
+              Practice with Audio
+            </Button>
           </Box>
-        </Paper>
-        
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} sx={{ width: '100%' }}>
-          {/* Camera View */}
-          <Box sx={{ width: '100%', flex: 1 }}>
-            <Paper elevation={3} sx={{ 
-              overflow: 'hidden',
-              background: 'rgba(255, 255, 255, 0.05)', 
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
-            }}>
-              <AppBar position="static" sx={{ 
-                background: 'linear-gradient(90deg, #0a2472, #2671e9)',
-                borderTopLeftRadius: theme.shape.borderRadius, 
-                borderTopRightRadius: theme.shape.borderRadius
-              }}>
-                <Toolbar variant="dense">
-                  <Typography variant="subtitle1" sx={{ 
-                    flexGrow: 1, 
-                    fontWeight: 600,
-                    color: '#ffffff' 
-                  }}>
-                    Record Your Swing
-                  </Typography>
-                  <IconButton color="inherit" onClick={resetSwing} size="small" sx={{ color: '#fff' }}>
-                    <RefreshIcon />
-                  </IconButton>
-                </Toolbar>
-              </AppBar>
-              <Box sx={{ p: 2 }}>
-                <CameraDetector />
-              </Box>
-            </Paper>
-          </Box>
-
-          {/* Swing Analysis */}
-          <Box sx={{ width: '100%', flex: 1 }}>
-            <Paper elevation={3} sx={{ 
-              overflow: 'hidden',
-              background: 'rgba(255, 255, 255, 0.05)', 
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
-            }}>
-              <AppBar position="static" sx={{ 
-                background: 'linear-gradient(90deg, #0a2472, #2671e9)',
-                borderTopLeftRadius: theme.shape.borderRadius, 
-                borderTopRightRadius: theme.shape.borderRadius
-              }}>
-                <Toolbar variant="dense">
-                  <Typography variant="subtitle1" sx={{ 
-                    flexGrow: 1, 
-                    fontWeight: 600,
-                    color: '#ffffff' 
-                  }}>
-                    Real-time Analysis
-                  </Typography>
-                </Toolbar>
-              </AppBar>
-              <Box sx={{ p: 2 }}>
-                <SwingDisplay />
-              </Box>
-            </Paper>
+          
+          {/* Practice with Audio & Video Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={() => router.push('/practice-video')}
+              sx={{ 
+                px: 6,
+                py: 1.5,
+                fontSize: '1.1rem',
+                minWidth: '280px',
+                fontWeight: 'bold'
+              }}
+            >
+              Practice with Video
+            </Button>
           </Box>
         </Stack>
+        
+        {/* Settings Button - smaller, less prominent */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, mt: -1 }}>
+          <Button 
+            variant="text" 
+            startIcon={<SettingsIcon />}
+            onClick={() => router.push('/settings')}
+            color="inherit"
+            size="small"
+            sx={{ opacity: 0.7 }}
+          >
+          </Button>
+        </Box>
       </Container>
     </Box>
   );
