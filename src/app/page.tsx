@@ -9,14 +9,14 @@ import { useSwingStore } from '@/store/swingStore';
 import { 
   Container, 
   Typography, 
-  Grid, 
   Paper, 
   Box, 
   Button, 
   AppBar, 
   Toolbar, 
   useTheme,
-  IconButton
+  IconButton,
+  Grid
 } from "@mui/material";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -83,7 +83,7 @@ export default function Home() {
 
         <Grid container spacing={4}>
           {/* Camera View */}
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} sm={6}>
             <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
               <AppBar position="static" color="primary" sx={{ borderTopLeftRadius: 8, borderTopRightRadius: 8 }}>
                 <Toolbar variant="dense">
@@ -102,7 +102,7 @@ export default function Home() {
           </Grid>
 
           {/* Swing Analysis */}
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} sm={6}>
             <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
               <AppBar position="static" color="primary" sx={{ borderTopLeftRadius: 8, borderTopRightRadius: 8 }}>
                 <Toolbar variant="dense">

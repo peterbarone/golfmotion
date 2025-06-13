@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -10,29 +8,13 @@ const roboto = Roboto({
   variable: '--font-roboto',
 })
 
-// Create a theme instance
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-    background: {
-      default: '#f5f5f5',
-    },
-  },
-  typography: {
-    fontFamily: roboto.style.fontFamily,
-  },
-});
-
 export const metadata: Metadata = {
   title: 'Golf Swing Tempo Trainer',
   description: 'Analyze and improve your golf swing tempo',
 }
+
+// Import the client component
+import ThemeWrapper from '../components/ThemeWrapper'
 
 export default function RootLayout({
   children,
@@ -48,10 +30,9 @@ export default function RootLayout({
         ></script>
       </head>
       <body className={roboto.className}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+        <ThemeWrapper>
           {children}
-        </ThemeProvider>
+        </ThemeWrapper>
       </body>
     </html>
   )
