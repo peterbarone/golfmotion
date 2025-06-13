@@ -41,12 +41,14 @@ export default function Home() {
 
   return (
     <Box sx={{ 
-      minHeight: '100vh',
-      background: '#ffffff',
-      backgroundSize: 'cover',
-      backgroundAttachment: 'fixed',
-      py: 6,
-      position: 'relative'
+      height: '100vh',
+      width: '100vw',
+      position: 'relative',
+      overflow: 'hidden',
+      bgcolor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1a1a1a',
+      display: 'flex',
+      flexDirection: 'column',
+      py: 6
     }}>
       <Container maxWidth="lg">
         <Box sx={{ 
@@ -63,8 +65,7 @@ export default function Home() {
               <Box sx={{ 
                 width: '80px', 
                 height: '80px', 
-                borderRadius: '50%', 
-                bgcolor: 'primary.main',
+                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

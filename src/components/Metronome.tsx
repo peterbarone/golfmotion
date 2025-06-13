@@ -363,27 +363,35 @@ export default function MetronomeUI() {
       {/* Swing Phase Indicator */}
       <Box sx={{ 
         position: 'absolute', 
-        top: 30, 
+        top: { xs: 15, sm: 30 }, 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
         width: '100%',
+        px: { xs: 1, sm: 2 },
         zIndex: 10
       }}>
         <Box sx={{ 
           display: 'flex', 
-          alignItems: 'center', 
-          gap: 2,
-          px: 3,
-          py: 1.5,
-          borderRadius: 5,
+          alignItems: 'center',
+          flexWrap: { xs: 'wrap', md: 'nowrap' },
+          justifyContent: 'center',
+          gap: { xs: 1, sm: 1.5, md: 2 },
+          px: { xs: 1.5, sm: 2, md: 3 },
+          py: { xs: 1, sm: 1.5 },
+          borderRadius: { xs: 3, sm: 5 },
           backdropFilter: 'blur(8px)',
           backgroundColor: 'rgba(255,255,255,0.08)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-          border: '1px solid rgba(255,255,255,0.1)'
+          border: '1px solid rgba(255,255,255,0.1)',
+          maxWidth: '95%'
         }}>
+
           <Chip 
-            icon={<SportsGolfIcon sx={{ transform: swingPhase === 'backswing' ? 'rotate(-45deg)' : 'none' }} />}
+            icon={<SportsGolfIcon sx={{ 
+              transform: swingPhase === 'backswing' ? 'rotate(-45deg)' : 'none',
+              fontSize: { xs: '1rem', sm: '1.2rem' } 
+            }} />}
             label="BACKSWING" 
             sx={{ 
               bgcolor: swingPhase === 'backswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
@@ -391,24 +399,30 @@ export default function MetronomeUI() {
               fontWeight: swingPhase === 'backswing' ? 700 : 400,
               transition: 'all 0.3s ease',
               boxShadow: swingPhase === 'backswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: 2.5,
+              py: { xs: 1.5, sm: 2, md: 2.5 },
+              height: 'auto',
               border: swingPhase === 'backswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: 1.5
+                px: { xs: 1, sm: 1.5 },
+                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' }
               }
             }} 
           />
           <Typography variant="h5" sx={{ 
             color: '#ffffff', 
             fontWeight: 300,
-            mx: 0.5,
+            mx: { xs: 0.2, sm: 0.5 },
             opacity: 0.8,
-            letterSpacing: '0.05em'
+            letterSpacing: '0.05em',
+            fontSize: { xs: '1rem', sm: '1.25rem' }
           }}>
             :
           </Typography>
           <Chip 
-            icon={<SportsGolfIcon sx={{ transform: swingPhase === 'downswing' ? 'rotate(45deg)' : 'none' }} />}
+            icon={<SportsGolfIcon sx={{ 
+              transform: swingPhase === 'downswing' ? 'rotate(45deg)' : 'none',
+              fontSize: { xs: '1rem', sm: '1.2rem' } 
+            }} />}
             label="DOWNSWING" 
             sx={{ 
               bgcolor: swingPhase === 'downswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
@@ -416,24 +430,30 @@ export default function MetronomeUI() {
               fontWeight: swingPhase === 'downswing' ? 700 : 400,
               transition: 'all 0.3s ease',
               boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: 2.5,
+              py: { xs: 1.5, sm: 2, md: 2.5 },
+              height: 'auto',
               border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: 1.5
+                px: { xs: 1, sm: 1.5 },
+                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' }
               }
             }} 
           />
           <Typography variant="h5" sx={{ 
             color: '#ffffff', 
             fontWeight: 300,
-            mx: 0.5,
+            mx: { xs: 0.2, sm: 0.5 },
             opacity: 0.8,
-            letterSpacing: '0.05em'
+            letterSpacing: '0.05em',
+            fontSize: { xs: '1rem', sm: '1.25rem' }
           }}>
             :
           </Typography>
           <Chip 
-            icon={<SportsGolfIcon sx={{ transform: 'rotate(90deg)' }} />}
+            icon={<SportsGolfIcon sx={{ 
+              transform: 'rotate(90deg)',
+              fontSize: { xs: '1rem', sm: '1.2rem' } 
+            }} />}
             label="HIT" 
             sx={{ 
               bgcolor: swingPhase === 'downswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
@@ -441,10 +461,12 @@ export default function MetronomeUI() {
               fontWeight: swingPhase === 'downswing' ? 700 : 400,
               transition: 'all 0.3s ease',
               boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: 2.5,
+              py: { xs: 1.5, sm: 2, md: 2.5 },
+              height: 'auto',
               border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: 1.5
+                px: { xs: 1, sm: 1.5 },
+                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' }
               }
             }} 
           />
@@ -453,11 +475,11 @@ export default function MetronomeUI() {
       
       {/* Display Panel */}
       <Box sx={{ 
-        borderRadius: 4, 
-        p: 4, 
-        mt: 8,
-        mb: 4, 
-        width: '85%', 
+        borderRadius: { xs: 3, sm: 4 }, 
+        p: { xs: 2, sm: 3, md: 4 }, 
+        mt: { xs: 6, sm: 7, md: 8 },
+        mb: { xs: 2, sm: 3, md: 4 }, 
+        width: { xs: '92%', sm: '85%' }, 
         maxWidth: 650,
         background: 'rgba(255, 255, 255, 0.08)',
         backdropFilter: 'blur(10px)',
@@ -576,11 +598,14 @@ export default function MetronomeUI() {
         display: 'flex',
         justifyContent: 'center',
         flexWrap: 'wrap',
-        gap: 2,
-        mb: 3,
-        mt: 2,
-        px: 2,
-        '& > *': { flex: '1 1 auto' }
+        gap: { xs: 1, sm: 1.5, md: 2 },
+        mb: { xs: 1.5, sm: 2, md: 3 },
+        mt: { xs: 1, sm: 1.5, md: 2 },
+        px: { xs: 1, sm: 1.5, md: 2 },
+        '& > *': { 
+          flex: '1 1 auto',
+          minWidth: { xs: '40%', sm: 'auto' }
+        }
       }}>
         {TEMPO_PRESETS.map((preset) => {
           // Custom icons for different presets
@@ -680,8 +705,8 @@ export default function MetronomeUI() {
       </Box>
 
       {/* Dial Control */}
-      <Box sx={{ mb: 5, mt: 2, position: 'relative' }}>
-        <Stack direction="row" justifyContent="center" alignItems="center" spacing={4}>
+      <Box sx={{ mb: { xs: 3, sm: 4, md: 5 }, mt: { xs: 1, sm: 1.5, md: 2 }, position: 'relative' }}>
+        <Stack direction="row" justifyContent="center" alignItems="center" spacing={{ xs: 2, sm: 3, md: 4 }}>
           {/* Decrement Button with enhanced styling */}
           <IconButton 
             onClick={decreaseTempo} 
@@ -690,8 +715,10 @@ export default function MetronomeUI() {
               bgcolor: 'rgba(255,255,255,0.12)',
               boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
               border: '2px solid rgba(255,255,255,0.2)',
-              p: 1.5,
+              p: { xs: 1, sm: 1.5 },
               transition: 'all 0.2s ease',
+              width: { xs: 45, sm: 52, md: 60 },
+              height: { xs: 45, sm: 52, md: 60 },
               '&:hover': {
                 bgcolor: 'rgba(255,255,255,0.2)',
                 transform: 'scale(1.1)'
@@ -709,8 +736,8 @@ export default function MetronomeUI() {
             ref={dialRef}
             onMouseDown={handleMouseDown}
             sx={{
-              width: 240,
-              height: 240,
+              width: { xs: 180, sm: 220, md: 240 },
+              height: { xs: 180, sm: 220, md: 240 },
               borderRadius: '50%',
               background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
               border: '2px solid rgba(255,255,255,0.15)',

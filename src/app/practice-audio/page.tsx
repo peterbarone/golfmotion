@@ -118,26 +118,6 @@ export default function PracticeAudioPage() {
       }}>
         <Metronome />
       </Box>
-
-      {/* Bottom navigation */}
-      <BottomNavigation
-        showLabels
-        sx={{ 
-          width: '100%',
-          boxShadow: '0px -2px 10px rgba(0,0,0,0.1)'
-        }}
-      >
-        <BottomNavigationAction 
-          label="Home" 
-          icon={<HomeIcon />} 
-          onClick={() => router.push('/')} 
-        />
-        <BottomNavigationAction 
-          label="Settings" 
-          icon={<SettingsIcon />} 
-          onClick={() => router.push('/settings')} 
-        />
-      </BottomNavigation>
     </Box>
   );
 }
