@@ -1,24 +1,48 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Typography, Button, IconButton, Stack, Slider, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { Box, Typography, Button, IconButton, Stack, Slider, Chip, Divider, Tooltip, ButtonGroup } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import GolfCourseIcon from '@mui/icons-material/GolfCourse';
+import SportsGolfIcon from '@mui/icons-material/SportsGolf';
+
+// Define golf-specific tempo types and ratios
+type TempoPreset = {
+  name: string;
+  tempo: number;
+  ratio: string;
+  description: string;
+};
+
+type SwingPhase = 'backswing' | 'downswing' | 'none';
 
 export default function MetronomeUI() {
   const MIN_TEMPO = 40;
   const MAX_TEMPO = 208;
   const LOOKAHEAD = 25.0; // How frequently to call scheduling function (in milliseconds)
   const SCHEDULE_AHEAD_TIME = 0.1; // How far ahead to schedule audio (seconds)
-  const [tempo, setTempo] = useState(120);
+  
+  // Golf-specific tempo presets
+  const TEMPO_PRESETS: TempoPreset[] = [
+    { name: "Tour Pro", tempo: 92, ratio: "3:1", description: "Professional tempo with 3:1 backswing to downswing ratio" },
+    { name: "Smooth Swing", tempo: 76, ratio: "2:1", description: "Balanced tempo with 2:1 ratio for smoother transition" },
+    { name: "Power Swing", tempo: 108, ratio: "4:1", description: "Power-focused with longer backswing for more energy" },
+    { name: "Beginner", tempo: 60, ratio: "1:1", description: "Even timing for beginners to develop consistency" }
+  ];
+  
+  const [tempo, setTempo] = useState(92); // Default to Tour Pro tempo
   const [meter, setMeter] = useState('4/4');
   const [dragging, setDragging] = useState(false);
   const [startAngle, setStartAngle] = useState(0);
   const [startTempo, setStartTempo] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
+  const [swingPhase, setSwingPhase] = useState<SwingPhase>('none');
+  const [activePreset, setActivePreset] = useState<string>("Tour Pro");
+  const [tempoRatio, setTempoRatio] = useState<string>("3:1");
   
   // For debugging
   const [debugMessage, setDebugMessage] = useState('');
@@ -31,7 +55,13 @@ export default function MetronomeUI() {
 
   const angleForTempo = (value: number) => ((value - MIN_TEMPO) / (MAX_TEMPO - MIN_TEMPO)) * 360;
 
-  const handleMeterChange = (e: SelectChangeEvent) => setMeter(e.target.value);
+  const handleMeterChange = (e: React.ChangeEvent<HTMLInputElement>) => setMeter(e.target.value);
+  
+  const handlePresetChange = (preset: TempoPreset) => {
+    setTempo(preset.tempo);
+    setActivePreset(preset.name);
+    setTempoRatio(preset.ratio);
+  };
   const handleSliderChange = (event: Event, value: number | number[], activeThumb: number) => {
     const newTempo = Array.isArray(value) ? value[0] : value;
     setTempo(newTempo);
@@ -102,7 +132,8 @@ export default function MetronomeUI() {
   // Persistent AudioContext to avoid browser autoplay policy issues
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const playClick = useCallback((isAccent: boolean) => {
+  // Enhanced playClick function for golf swing phases
+  const playClick = useCallback((phase: 'backswing' | 'downswing' | 'accent' | 'normal') => {
     try {
       // Create or resume AudioContext
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -110,23 +141,35 @@ export default function MetronomeUI() {
         audioContextRef.current = new AudioContext();
       }
       const context = audioContextRef.current;
-      if (context.state === 'suspended') {
-        context.resume();
-      }
-
-      // Create oscillator
+      
+      // Create oscillator and gain nodes
       const osc = context.createOscillator();
       const gain = context.createGain();
-
-      // Configure sound based on accent
-      osc.type = isAccent ? 'triangle' : 'sine';
-      osc.frequency.value = isAccent ? 880 : 440; // Higher pitch for accent
-
-      // Set volume and envelope
-      gain.gain.value = isAccent ? 0.7 : 0.5;
-      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.1);
-
-      // Connect and play immediately
+      
+      // Configure sound based on swing phase
+      switch (phase) {
+        case 'backswing':
+          // Lower tone for backswing
+          osc.frequency.value = 600;
+          gain.gain.value = 0.4;
+          break;
+        case 'downswing':
+          // Higher tone for downswing (impact)
+          osc.frequency.value = 1200;
+          gain.gain.value = 0.6;
+          break;
+        case 'accent':
+          // For count accents
+          osc.frequency.value = 1000;
+          gain.gain.value = 0.5;
+          break;
+        default:
+          // Normal click
+          osc.frequency.value = 800;
+          gain.gain.value = 0.3;
+      }
+      
+      // Connect and play the sound
       osc.connect(gain);
       gain.connect(context.destination);
       osc.start();
@@ -179,24 +222,30 @@ export default function MetronomeUI() {
     };
   }, []);
 
-  // Use a simple interval-based approach for more reliable timing across browsers
-  // Improved metronome loop with explicit timer reference management
+  // Golf-specific metronome logic with backswing/downswing phases
   const runMetronome = useCallback(() => {
     // Make sure AudioContext is running (may be suspended by browser)
     if (audioContextRef.current && audioContextRef.current.state !== 'running') {
       audioContextRef.current.resume();
     }
     
-    const beatsInMeasure = parseInt(meter.split('/')[0]);
-    const beatPosition = beatCountRef.current % beatsInMeasure;
-    const isFirstBeatInMeasure = beatPosition === 0;
+    // Parse the tempo ratio (e.g., "3:1" => [3,1])
+    const [backswingCount, downswingCount] = tempoRatio.split(':').map(Number);
+    const totalCycleBeats = backswingCount + downswingCount;
     
-    // Play the click sound
-    playClick(isFirstBeatInMeasure);
+    // Calculate which phase we're in
+    const cyclePosition = beatCountRef.current % totalCycleBeats;
+    const isBackswing = cyclePosition < backswingCount;
+    const currentPhase = isBackswing ? 'backswing' : 'downswing';
+    const isPhaseStart = cyclePosition === 0 || cyclePosition === backswingCount;
     
-    // Update UI
-    setCurrentBeat(beatPosition + 1);
-    setDebugMessage(`Beat: ${beatPosition + 1}/${beatsInMeasure}, Tempo: ${tempo}`);
+    // Play the appropriate sound based on swing phase
+    playClick(isPhaseStart ? currentPhase : 'normal');
+    
+    // Update UI to show the current swing phase
+    setSwingPhase(currentPhase);
+    setCurrentBeat(cyclePosition + 1);
+    setDebugMessage(`Phase: ${currentPhase}, Beat: ${cyclePosition + 1}/${totalCycleBeats}, Tempo: ${tempo}`);
     
     // Increment beat counter
     beatCountRef.current++;
@@ -289,218 +338,527 @@ export default function MetronomeUI() {
       sx={{
         width: '100vw',
         height: '100vh',
-        bgcolor: '#387651', /* Green background */
+        background: 'linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%)', /* Rich gradient background */
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 3
+        p: 3,
+        fontFamily: '"Inter", "Outfit", "Roboto", "Helvetica", sans-serif',
+        overflow: 'hidden',
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+          pointerEvents: 'none',
+          zIndex: 1
+        }
       }}
     >
-      {/* Beat Indicator */}
+      {/* Swing Phase Indicator */}
       <Box sx={{ 
         position: 'absolute', 
-        top: 20, 
+        top: 30, 
         display: 'flex', 
         justifyContent: 'center', 
-        width: '100%' 
+        alignItems: 'center',
+        width: '100%',
+        zIndex: 10
       }}>
-        {meter && Array.from({ length: parseInt(meter.split('/')[0]) }).map((_, i) => (
-          <Box 
-            key={i} 
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2,
+          px: 3,
+          py: 1.5,
+          borderRadius: 5,
+          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <Chip 
+            icon={<SportsGolfIcon sx={{ transform: swingPhase === 'backswing' ? 'rotate(-45deg)' : 'none' }} />}
+            label="BACKSWING" 
             sx={{ 
-              width: 14, 
-              height: 14, 
-              borderRadius: '50%', 
-              mx: 0.5,
-              bgcolor: currentBeat === i + 1 ? '#4a6fa5' : 'rgba(74, 111, 165, 0.3)',
-              boxShadow: currentBeat === i + 1 ? '0 0 10px rgba(74, 111, 165, 0.5)' : 'none',
-              transition: 'all 0.1s ease-in-out'
+              bgcolor: swingPhase === 'backswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
+              color: swingPhase === 'backswing' ? '#1b4332' : '#ffffff',
+              fontWeight: swingPhase === 'backswing' ? 700 : 400,
+              transition: 'all 0.3s ease',
+              boxShadow: swingPhase === 'backswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
+              py: 2.5,
+              border: swingPhase === 'backswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
+              '& .MuiChip-label': {
+                px: 1.5
+              }
             }} 
           />
-        ))}
+          <Typography variant="h5" sx={{ 
+            color: '#ffffff', 
+            fontWeight: 300,
+            mx: 0.5,
+            opacity: 0.8,
+            letterSpacing: '0.05em'
+          }}>
+            :
+          </Typography>
+          <Chip 
+            icon={<SportsGolfIcon sx={{ transform: swingPhase === 'downswing' ? 'rotate(45deg)' : 'none' }} />}
+            label="DOWNSWING" 
+            sx={{ 
+              bgcolor: swingPhase === 'downswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
+              color: swingPhase === 'downswing' ? '#1b4332' : '#ffffff',
+              fontWeight: swingPhase === 'downswing' ? 700 : 400,
+              transition: 'all 0.3s ease',
+              boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
+              py: 2.5,
+              border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
+              '& .MuiChip-label': {
+                px: 1.5
+              }
+            }} 
+          />
+          <Typography variant="h5" sx={{ 
+            color: '#ffffff', 
+            fontWeight: 300,
+            mx: 0.5,
+            opacity: 0.8,
+            letterSpacing: '0.05em'
+          }}>
+            :
+          </Typography>
+          <Chip 
+            icon={<SportsGolfIcon sx={{ transform: 'rotate(90deg)' }} />}
+            label="HIT" 
+            sx={{ 
+              bgcolor: swingPhase === 'downswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
+              color: swingPhase === 'downswing' ? '#1b4332' : '#ffffff',
+              fontWeight: swingPhase === 'downswing' ? 700 : 400,
+              transition: 'all 0.3s ease',
+              boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
+              py: 2.5,
+              border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
+              '& .MuiChip-label': {
+                px: 1.5
+              }
+            }} 
+          />
+        </Box>
       </Box>
       
       {/* Display Panel */}
       <Box sx={{ 
-        bgcolor: 'transparent', 
-        borderRadius: 3, 
-        p: 2.5, 
+        borderRadius: 4, 
+        p: 4, 
+        mt: 8,
         mb: 4, 
-        width: '80%', 
-        maxWidth: 600
+        width: '85%', 
+        maxWidth: 650,
+        background: 'rgba(255, 255, 255, 0.08)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
+        border: '1px solid rgba(255, 255, 255, 0.12)'
       }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Stack>
-            <Typography variant="body2" sx={{ color: '#4a6fa5', fontWeight: 500 }}>TEMPO</Typography>
-            <Typography variant="h3" sx={{ 
-              color: '#333333', 
-              fontWeight: 700
-            }}>
-              {tempo}
-            </Typography>
-          </Stack>
-          <FormControl variant="outlined" sx={{ minWidth: 100 }}>
-            <InputLabel sx={{ color: '#4a6fa5' }}>Meter</InputLabel>
-            <Select
-              value={meter}
-              onChange={handleMeterChange}
-              label="Meter"
+        <Stack spacing={2.5}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }}>
+            <Typography 
+              variant="overline" 
               sx={{ 
-                color: '#333333',
-                '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.2)' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.4)' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#4a6fa5' },
-                '.MuiSelect-icon': { color: '#4a6fa5' } 
+                color: 'rgba(255, 255, 255, 0.7)', 
+                fontWeight: 500, 
+                fontSize: '0.9rem',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  left: '-15px',
+                  right: '-15px',
+                  bottom: '-4px',
+                  height: '1px',
+                  background: 'rgba(255, 255, 255, 0.2)'
+                }
               }}
             >
-              <MenuItem value="2/4">2/4</MenuItem>
-              <MenuItem value="3/4">3/4</MenuItem>
-              <MenuItem value="4/4">4/4</MenuItem>
-              <MenuItem value="6/8">6/8</MenuItem>
-            </Select>
-          </FormControl>
+              SWING TEMPO
+            </Typography>
+          </Box>
+          
+          <Stack alignItems="center" spacing={2}>
+            {/* Large Tempo Number */}
+            <Box sx={{ 
+              position: 'relative', 
+              textAlign: 'center',
+              transform: isPlaying ? 'scale(1.05)' : 'scale(1)',
+              transition: 'all 0.3s ease'
+            }}>
+              <Typography 
+                variant="h1" 
+                sx={{ 
+                  color: '#ffffff', 
+                  fontSize: '6rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.05em',
+                  textShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+                  lineHeight: 1
+                }}
+              >
+                {tempo}
+              </Typography>
+              
+              {/* Tempo ratio chip removed as requested */}
+            </Box>
+          
+            {/* Tempo Ratio Explanation */}
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: 'rgba(255, 255, 255, 0.7)', 
+                fontWeight: 300,
+                textAlign: 'center',
+                maxWidth: '80%',
+                fontStyle: 'italic'
+              }}
+            >
+              {tempoRatio === '3:1' ? '3 count backswing : 1 count downswing (Tour Pro)' : 
+               tempoRatio === '2:1' ? '2 count backswing : 1 count downswing (Smooth Swing)' : 
+               tempoRatio === '4:1' ? '4 count backswing : 1 count downswing (Power Swing)' : 
+               '1 count backswing : 1 count downswing (Beginner)'}
+            </Typography>
+          </Stack>
+          
+          {/* Tempo Progress Bar with Tick Marks */}
+          <Box sx={{ mt: 2, position: 'relative', height: 30, pt: 2 }}>
+            {/* Tick Marks */}
+            <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: 15, display: 'flex' }}>
+              {[MIN_TEMPO, 80, 120, 160, MAX_TEMPO].map((tick, index) => (
+                <Box 
+                  key={index} 
+                  sx={{ 
+                    position: 'absolute',
+                    left: `${(tick - MIN_TEMPO) / (MAX_TEMPO - MIN_TEMPO) * 100}%`,
+                    transform: 'translateX(-50%)',
+                    height: '12px',
+                    width: '1px',
+                    bgcolor: 'rgba(255, 255, 255, 0.3)'
+                  }}
+                />
+              ))}
+            </Box>
+            
+            {/* Progress Bar */}
+            <Box sx={{ 
+              height: 10, 
+              bgcolor: 'rgba(255, 255, 255, 0.1)', 
+              borderRadius: 2, 
+              overflow: 'hidden',
+              boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.2)'
+            }}>
+              <Box sx={{ 
+                width: `${(tempo - MIN_TEMPO) / (MAX_TEMPO - MIN_TEMPO) * 100}%`, 
+                height: '100%', 
+                background: 'linear-gradient(to right, #4ade80, #22d3ee)',
+                boxShadow: '0 0 10px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(255, 255, 255, 0.5)'
+              }} />
+            </Box>
+          </Box>
         </Stack>
-        <Box sx={{ mt: 2, height: 8, bgcolor: 'rgba(0,0,0,0.08)', borderRadius: 4, overflow: 'hidden' }}>
-          <Box sx={{ 
-            width: `${(tempo - MIN_TEMPO) / (MAX_TEMPO - MIN_TEMPO) * 100}%`, 
-            height: '100%', 
-            background: 'linear-gradient(to right, #4a6fa5, #6a8cbe)',
-            boxShadow: '0 0 8px rgba(74, 111, 165, 0.4)'
-          }} />
-        </Box>
+      </Box>
+      
+      {/* Preset Buttons */}
+      <Box sx={{ 
+        display: 'flex',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        gap: 2,
+        mb: 3,
+        mt: 2,
+        px: 2,
+        '& > *': { flex: '1 1 auto' }
+      }}>
+        {TEMPO_PRESETS.map((preset) => {
+          // Custom icons for different presets
+          const getPresetIcon = () => {
+            switch(preset.name) {
+              case "Tour Pro": 
+                return <SportsGolfIcon sx={{ 
+                  fontSize: '1.4rem', 
+                  transform: 'rotate(-15deg)',
+                  color: '#ffffff'
+                }} />;
+              case "Smooth Swing": 
+                return <SportsGolfIcon sx={{ 
+                  fontSize: '1.4rem', 
+                  transform: 'rotate(15deg)',
+                  color: '#ffffff'
+                }} />;
+              case "Power Swing": 
+                return <SportsGolfIcon sx={{ 
+                  fontSize: '1.4rem', 
+                  transform: 'rotate(45deg)',
+                  color: '#ffffff'
+                }} />;
+              case "Beginner":
+                return <GolfCourseIcon sx={{ 
+                  fontSize: '1.4rem',
+                  transform: 'scale(0.85)',
+                  color: '#ffffff'
+                }} />;
+              default:
+                return <GolfCourseIcon sx={{ color: '#ffffff' }} />;
+            }
+          };
+          
+          // Background color for active buttons (subtle versions of original colors)
+          const getActiveBackgroundColor = () => {
+            switch(preset.name) {
+              case "Tour Pro": return 'rgba(16, 185, 129, 0.3)'; // Emerald
+              case "Smooth Swing": return 'rgba(59, 130, 246, 0.3)'; // Blue
+              case "Power Swing": return 'rgba(245, 158, 11, 0.3)'; // Amber
+              case "Beginner": return 'rgba(20, 184, 166, 0.3)'; // Teal
+              default: return 'rgba(255, 255, 255, 0.2)';
+            }
+          };
+          
+          const activeBackgroundColor = getActiveBackgroundColor();
+          const isActive = activePreset === preset.name;
+          
+          return (
+            <Button 
+              key={preset.name}
+              variant={isActive ? "contained" : "outlined"}
+              onClick={() => handlePresetChange(preset)}
+              startIcon={getPresetIcon()}
+              sx={{ 
+                minWidth: 0,
+                maxWidth: 160,
+                py: 1.2,
+                px: 2,
+                height: 64,
+                color: '#ffffff',
+                bgcolor: isActive ? activeBackgroundColor : 'transparent',
+                borderColor: '#ffffff',
+                borderWidth: 1,
+                borderRadius: 8,
+                fontWeight: isActive ? 700 : 500,
+                boxShadow: isActive ? '0 4px 12px rgba(255,255,255,0.2)' : 'none',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: isActive ? activeBackgroundColor : 'rgba(255,255,255,0.1)',
+                  borderColor: '#ffffff',
+                  boxShadow: '0 6px 16px rgba(255,255,255,0.2)'
+                }
+              }}
+            >
+              <Stack spacing={0.3} alignItems="center">
+                <Typography variant="subtitle2" sx={{ 
+                  fontWeight: isActive ? 700 : 600,
+                  textAlign: 'center',
+                  color: '#ffffff'
+                }}>
+                  {preset.name}
+                </Typography>
+                <Typography variant="caption" sx={{ 
+                  opacity: 0.9, 
+                  fontWeight: 400,
+                  textAlign: 'center',
+                  color: '#ffffff'
+                }}>
+                  {preset.ratio} Ratio
+                </Typography>
+              </Stack>
+            </Button>
+          );
+        })}
+        <Divider sx={{ bgcolor: 'rgba(255,255,255,0.15)', my: 2 }} />
       </Box>
 
       {/* Dial Control */}
-      <Stack direction="row" justifyContent="center" alignItems="center" spacing={3} sx={{ mb: 4 }}>
-        <IconButton 
-          onClick={decreaseTempo} 
-          sx={{ 
-            color: '#333333', 
-            fontSize: 32, 
-            bgcolor: 'rgba(0,0,0,0.05)', 
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' },
-            width: 56,
-            height: 56
-          }}
-        >
-          <RemoveIcon fontSize="inherit" />
-        </IconButton>
-        <Box
-          ref={dialRef}
-          onMouseDown={handleMouseDown}
-          sx={{ 
-            position: 'relative', 
-            width: 220, 
-            height: 220, 
-            background: 'radial-gradient(circle at center, #ffffff, #e9e7e2)',
-            borderRadius: '50%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            cursor: 'grab',
-            boxShadow: '0 6px 15px rgba(0,0,0,0.15), inset 0 1px 3px rgba(255,255,255,0.6)',
-            border: '1px solid rgba(0,0,0,0.05)' 
-          }}
-        >
+      <Box sx={{ mb: 5, mt: 2, position: 'relative' }}>
+        <Stack direction="row" justifyContent="center" alignItems="center" spacing={4}>
+          {/* Decrement Button with enhanced styling */}
           <IconButton 
-            onClick={toggleMetronome}
+            onClick={decreaseTempo} 
             sx={{ 
-              color: isPlaying ? '#e74c3c' : '#4a6fa5',
-              bgcolor: isPlaying ? 'rgba(231, 76, 60, 0.1)' : 'rgba(74, 111, 165, 0.1)',
-              fontSize: 60,
-              transition: 'all 0.2s ease-in-out',
+              color: '#ffffff', 
+              bgcolor: 'rgba(255,255,255,0.12)',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+              border: '2px solid rgba(255,255,255,0.2)',
+              p: 1.5,
+              transition: 'all 0.2s ease',
               '&:hover': {
-                bgcolor: isPlaying ? 'rgba(231, 76, 60, 0.2)' : 'rgba(74, 111, 165, 0.2)',
+                bgcolor: 'rgba(255,255,255,0.2)',
+                transform: 'scale(1.1)'
+              },
+              '&:active': {
+                transform: 'scale(0.95)'
               }
             }}
           >
-            {isPlaying ? 
-              <StopIcon fontSize="inherit" /> : 
-              <PlayArrowIcon fontSize="inherit" />}
+            <RemoveIcon fontSize="large" />
           </IconButton>
-          {/* Beat indicator hand */}
-          {isPlaying && (
+          
+          {/* Enhanced Dial */}
+          <Box
+            ref={dialRef}
+            onMouseDown={handleMouseDown}
+            sx={{
+              width: 240,
+              height: 240,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+              border: '2px solid rgba(255,255,255,0.15)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              position: 'relative',
+              cursor: 'grab',
+              '&:active': {
+                cursor: 'grabbing'
+              },
+              transition: 'all 0.3s ease',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2), inset 0 2px 15px rgba(255,255,255,0.1)'
+            }}
+          >
+            {/* Dial outer glow effect */}
             <Box sx={{
               position: 'absolute',
-              top: '50%',
-              left: '50%',
-              height: 95,
-              width: 2,
-              bgcolor: '#e74c3c',
-              transformOrigin: 'bottom center',
-              transform: `translate(-50%, -100%) rotate(${currentBeat * (360/parseInt(meter.split('/')[0]))}deg)`,
-              transition: 'transform 0.1s ease-out',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-3px',
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: '#e74c3c',
-                boxShadow: '0 0 6px rgba(231, 76, 60, 0.7)'
-              }
+              inset: -2,
+              borderRadius: '50%',
+              padding: 2,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%)',
+              mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              maskComposite: 'xor',
+              WebkitMaskComposite: 'xor',
+              pointerEvents: 'none',
+              opacity: 0.6
             }} />
-          )}
-          
-          {/* Tick marks */}
-          {[...Array(60)].map((_, i) => {
-            const angle = (i / 60) * 360;
-            return (
-              <Box
-                key={i}
+            
+            {/* Tick marks for the dial */}
+            {[...Array(12)].map((_, i) => (
+              <Box 
+                key={i} 
                 sx={{
-                  position: 'absolute', top: '50%', left: '50%',
-                  width: i % 5 === 0 ? 4 : 2,
-                  height: i % 5 === 0 ? 14 : 7,
-                  bgcolor: i % 5 === 0 ? '#4a6fa5' : 'rgba(74, 111, 165, 0.3)',
-                  transform: `translate(-50%, -50%) rotate(${angle}deg) translate(0, -100px)`,
-                  transformOrigin: 'center',
-                  boxShadow: i % 5 === 0 ? '0 0 3px rgba(74, 111, 165, 0.4)' : 'none'
+                  position: 'absolute',
+                  width: 2,
+                  height: i % 3 === 0 ? 12 : 8,
+                  backgroundColor: i % 3 === 0 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)',
+                  transform: `rotate(${i * 30}deg) translateY(-108px)`,
+                  transformOrigin: 'bottom center'
                 }}
               />
-            );
-          })}
-        </Box>
-        <IconButton 
-          onClick={increaseTempo} 
-          sx={{ 
-            color: '#333333', 
-            fontSize: 32, 
-            bgcolor: 'rgba(0,0,0,0.05)', 
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' },
-            width: 56,
-            height: 56
-          }}
-        >
-          <AddIcon fontSize="inherit" />
-        </IconButton>
-      </Stack>
-
-      {/* Tempo Slider */}
-      <Box sx={{ width: '80%', maxWidth: 600, mb: 4 }}>
-        <Slider
-          value={tempo}
-          onChange={handleSliderChange}
-          min={MIN_TEMPO}
-          max={MAX_TEMPO}
-          step={1}
-          marks={[{ value: MIN_TEMPO, label: `${MIN_TEMPO}` }, { value: 120, label: '120' }, { value: MAX_TEMPO, label: `${MAX_TEMPO}` }]}
-          sx={{ 
-            color: '#8c9eff', 
-            '& .MuiSlider-rail': { bgcolor: 'rgba(255,255,255,0.2)' },
-            '& .MuiSlider-track': { background: 'linear-gradient(to right, #8c9eff, #4fc3f7)' },
-            '& .MuiSlider-thumb': { 
-              bgcolor: '#ffffff',
-              boxShadow: '0 0 8px rgba(140,158,255,0.8)' 
-            },
-            '& .MuiSlider-mark': { bgcolor: 'rgba(255,255,255,0.5)' },
-            '& .MuiSlider-markLabel': { color: 'rgba(255,255,255,0.7)' }
-          }}
-        />
+            ))}
+            
+            {/* Golf swing timing marks - specifically for 3:1 timing */}
+            <Box sx={{ 
+              position: 'absolute', 
+              width: '100%', 
+              height: '100%',
+              borderRadius: '50%',
+              pointerEvents: 'none'
+            }}>
+              <Typography 
+                sx={{ 
+                  position: 'absolute', 
+                  top: 20, 
+                  left: '50%', 
+                  transform: 'translateX(-50%)',
+                  color: 'rgba(255,255,255,0.6)',
+                  fontWeight: 600,
+                  fontSize: '0.8rem'
+                }}
+              >
+                1
+              </Typography>
+              <Typography 
+                sx={{ 
+                  position: 'absolute', 
+                  right: 20, 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  color: 'rgba(255,255,255,0.6)',
+                  fontWeight: 600,
+                  fontSize: '0.8rem'
+                }}
+              >
+                2
+              </Typography>
+              <Typography 
+                sx={{ 
+                  position: 'absolute', 
+                  bottom: 20, 
+                  left: '50%', 
+                  transform: 'translateX(-50%)',
+                  color: 'rgba(255,255,255,0.6)',
+                  fontWeight: 600,
+                  fontSize: '0.8rem'
+                }}
+              >
+                3
+              </Typography>
+              {/* "GO" label removed */}
+            </Box>
+            
+            {/* Green indicator line and base dot removed */}
+            
+            {/* Play/Stop Button with enhanced styling */}
+            <IconButton
+              onClick={toggleMetronome}
+              sx={{
+                bgcolor: isPlaying ? '#4ade80' : '#ffffff',
+                '&:hover': {
+                  bgcolor: isPlaying ? '#22c55e' : '#f5f5f5',
+                  transform: 'scale(1.05)',
+                  boxShadow: isPlaying
+                    ? '0 0 20px rgba(74, 222, 128, 0.6), 0 8px 16px rgba(0,0,0,0.3)'
+                    : '0 8px 16px rgba(0,0,0,0.3)'
+                },
+                boxShadow: isPlaying
+                  ? '0 0 20px rgba(74, 222, 128, 0.4), 0 6px 12px rgba(0,0,0,0.25)'
+                  : '0 6px 12px rgba(0,0,0,0.25)',
+                p: 3,
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {isPlaying ? 
+                <StopIcon sx={{ fontSize: 34, color: '#ffffff' }} /> : 
+                <PlayArrowIcon sx={{ fontSize: 34, color: '#1b4332' }} />
+              }
+            </IconButton>
+          </Box>
+          
+          {/* Increment Button with enhanced styling */}
+          <IconButton 
+            onClick={increaseTempo} 
+            sx={{ 
+              color: '#ffffff', 
+              bgcolor: 'rgba(255,255,255,0.12)',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+              border: '2px solid rgba(255,255,255,0.2)',
+              p: 1.5,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.2)',
+                transform: 'scale(1.1)'
+              },
+              '&:active': {
+                transform: 'scale(0.95)'
+              }
+            }}
+          >
+            <AddIcon fontSize="large" />
+          </IconButton>
+        </Stack>
       </Box>
+
+      {/* Tempo slider removed as requested */}
 
       {/* Tap Button */}
       <Button 
