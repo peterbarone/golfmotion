@@ -24,82 +24,108 @@ const SwingDisplay = () => {
 
   /* -------------------- render -------------------- */
   return (
-    <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div>
       {/* Tempo ratio */}
-      <div className="flex flex-col items-center mb-6">
-        <p className="text-sm text-gray-500 mb-1">TEMPO RATIO</p>
-        <h1 className={`text-5xl font-bold ${tempoColor(tempoRatio)} mb-1`}>
-          {tempoRatio ? tempoRatio.toFixed(1) : '-.-'}
-        </h1>
-        <p className="text-sm text-gray-600">Ideal: 3:1 ratio</p>
+      <div className="flex flex-col items-center mb-8 relative">
+        <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 w-28 h-28 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-800 overflow-hidden">
+          <div className="text-center">
+            <p className="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wider">Tempo</p>
+            <h1 className={`text-3xl font-bold ${tempoColor(tempoRatio)}`}>
+              {tempoRatio ? tempoRatio.toFixed(1) : '-.-'}
+            </h1>
+          </div>
+        </div>
+        <div className="pt-14 w-full">
+          <p className="text-sm font-medium text-center text-gray-600 dark:text-gray-300 mt-2">Ideal: <span className="text-green-600 dark:text-green-400 font-bold">3:1</span> ratio</p>
+        </div>
       </div>
 
       {/* Times */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-8">
         <div
-          className={`border rounded-md p-4 text-center ${
-            swingState === 'backswing' ? 'bg-green-50 dark:bg-green-900' : '' // Uses swingState from store
-          }`}
+          className={`relative overflow-hidden rounded-xl p-5 text-center ${
+            swingState === 'backswing' 
+              ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 shadow-lg transform scale-105 border-2 border-blue-200 dark:border-blue-700' 
+              : 'bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-md'
+          } transition-all duration-300`}
         >
-          <p className="text-3xl font-bold">{backswingTime.toFixed(1)}</p>
-          <p className="text-xs text-gray-500">BACKSWING (SEC)</p>
+          <div className="mb-1">
+            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">
+              {backswingTime.toFixed(1)}
+            </p>
+            <p className="text-xs font-semibold tracking-wider text-blue-500 dark:text-blue-300 uppercase">Backswing</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">(seconds)</p>
+          </div>
         </div>
+        
         <div
-          className={`border rounded-md p-4 text-center ${
-            swingState === 'downswing' ? 'bg-green-50 dark:bg-green-900' : '' // Uses swingState from store
-          }`}
+          className={`relative overflow-hidden rounded-xl p-5 text-center ${
+            swingState === 'downswing' 
+              ? 'bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 shadow-lg transform scale-105 border-2 border-purple-200 dark:border-purple-700' 
+              : 'bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-md'
+          } transition-all duration-300`}
         >
-          <p className="text-3xl font-bold">{downswingTime.toFixed(1)}</p>
-          <p className="text-xs text-gray-500">DOWNSWING (SEC)</p>
+          <div className="mb-1">
+            <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 tracking-tight">
+              {downswingTime.toFixed(1)}
+            </p>
+            <p className="text-xs font-semibold tracking-wider text-purple-500 dark:text-purple-300 uppercase">Downswing</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">(seconds)</p>
+          </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="grid grid-cols-1 gap-3 mb-6"> {/* Updated grid to single column for Reset button */}
-        {/* Removed START, TOP, FINISH buttons and their handlers */}
+      <div className="mb-8"> 
         <button
-          onClick={resetSwing} // Uses resetSwing from store
-          className="col-span-1 flex items-center justify-center gap-2 py-2 rounded-md border" // Adjusted col-span
+          onClick={resetSwing}
+          className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold transition-colors duration-200 shadow-sm border border-gray-200 dark:border-gray-600"
         >
-          <FaRedo /> RESET
+          <FaRedo className="text-gray-500 dark:text-gray-300" /> 
+          <span>Reset Swing</span>
         </button>
       </div>
 
-      {/* Instructions Removed */}
+      {/* History section */}
+      <div className="border-t pt-4 dark:border-gray-700">
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="flex items-center gap-2 mb-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
+        >
+          <FaHistory className="text-blue-500 dark:text-blue-400" /> 
+          <span>{showHistory ? 'Hide History' : 'Show Swing History'}</span>
+        </button>
 
-      {/* History toggle */}
-      <button
-        onClick={() => setShowHistory(!showHistory)} // Uses setShowHistory and showHistory from store
-        className="flex items-center gap-2 mb-3 text-sm text-blue-600 hover:underline"
-      >
-        <FaHistory /> {showHistory ? 'Hide History' : 'Show Swing History'}
-      </button>
-
-      {/* History list */}
-      {showHistory && (
-        <div className="space-y-3 max-h-64 overflow-y-auto text-sm">
-          {swingHistory.length ? (
-            swingHistory.map((s) => (
-              <div
-                key={s.id}
-                className="flex justify-between items-center border p-2 rounded-md"
-              >
-                <span>{s.timestamp}</span>
-                <span>
-                  {s.backswingTime.toFixed(1)}s / {s.downswingTime.toFixed(1)}s
-                </span>
-                <span
-                  className={`px-2 py-0.5 rounded text-white text-xs ${badgeColor(s.quality)}`}
+        {/* History list */}
+        {showHistory && (
+          <div className="space-y-2 max-h-64 overflow-y-auto rounded-lg bg-gray-50 dark:bg-gray-700 p-3 shadow-inner">
+            {swingHistory.length ? (
+              swingHistory.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex justify-between items-center py-2 px-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-shadow duration-200"
                 >
-                  {s.tempoRatio.toFixed(1)}
-                </span>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No swing history yet</p>
-          )}
-        </div>
-      )}
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{s.timestamp}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">
+                      <span className="text-blue-600 dark:text-blue-400">{s.backswingTime.toFixed(1)}s</span>
+                      <span className="text-gray-400 mx-1">/</span>
+                      <span className="text-purple-600 dark:text-purple-400">{s.downswingTime.toFixed(1)}s</span>
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-md text-white text-xs font-bold shadow-sm ${badgeColor(s.quality)}`}
+                    >
+                      {s.tempoRatio.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center py-4 text-gray-500 dark:text-gray-400 italic">No swing history yet</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

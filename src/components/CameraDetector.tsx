@@ -1,13 +1,50 @@
 'use client'
 
-import React, { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Webcam from 'react-webcam'
-import { Pose } from '@mediapipe/pose'
+
+// Extend Window interface to include the MediaPipe object
+declare global {
+  interface Window {
+    Pose?: any;
+  }
+}
+
+// Define types for pose landmarks since we can't import from @mediapipe/pose
+interface NormalizedLandmark {
+  x: number;
+  y: number;
+  z: number;
+  visibility?: number;
+}
+
+interface PoseResults {
+  poseLandmarks?: NormalizedLandmark[];
+}
+
 import { useSwingStore } from '../store/swingStore'
 import { useToast } from './ui/Toast'
+import { 
+  Box, 
+  Button, 
+  CircularProgress, 
+  Typography, 
+  Paper,
+  Alert,
+  Stack,
+  Chip,
+  useTheme
+} from '@mui/material'
+import { 
+  PlayArrow, 
+  Stop, 
+  Videocam, 
+  VideocamOff, 
+  FiberManualRecord
+} from '@mui/icons-material'
 
 // Pose landmarks of interest for golf swing detection
-const POSE_LANDMARKS = {
+const LANDMARKS = {
   LEFT_SHOULDER: 11,
   RIGHT_SHOULDER: 12,
   LEFT_ELBOW: 13,
@@ -16,7 +53,7 @@ const POSE_LANDMARKS = {
   RIGHT_WRIST: 16,
   LEFT_HIP: 23,
   RIGHT_HIP: 24,
-}
+} as const
 
 // Configurables
 const DETECTION_CONFIDENCE = 0.7
@@ -24,10 +61,11 @@ const BACKSWING_THRESHOLD = 0.7  // How far back wrist needs to move (ratio)
 const DOWNSWING_THRESHOLD = 0.6  // How far down wrist needs to move (ratio)
 const FPS = 30
 
-const CameraDetector: React.FC = () => {
+const CameraDetector = () => {
+  const theme = useTheme()
   // References
   const webcamRef = useRef<Webcam>(null)
-  const poseRef = useRef<Pose | null>(null)
+  const poseRef = useRef<any>(null)  // Use any for MediaPipe Pose instance
   const requestRef = useRef<number>(0)
   
   // Local state
@@ -40,8 +78,8 @@ const CameraDetector: React.FC = () => {
     swingState,
     cameraEnabled,
     detectionActive,
-    selectedCameraDeviceId, // Added
-    handedness,             // Added
+    selectedCameraDeviceId,
+    handedness,
     startSwing,
     recordTransition,
     finishSwing,
@@ -62,13 +100,43 @@ const CameraDetector: React.FC = () => {
     const loadPose = async () => {
       try {
         setIsLoading(true)
+        console.log('Loading MediaPipe Pose...')
         
-        const pose = new Pose({
-          locateFile: (file) => {
+        // Access Pose from window object
+        const waitForPose = (): Promise<any> => {
+          return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('MediaPipe Pose script loading timed out'))
+            }, 10000) // 10 seconds timeout
+            
+            const checkForPose = () => {
+              // Check for pose at global level
+              if (window.Pose) {
+                clearTimeout(timeout)
+                resolve(window.Pose)
+                return
+              }
+              
+              setTimeout(checkForPose, 100)
+            }
+            
+            checkForPose()
+          })
+        }
+        
+        // Wait for and get the Pose constructor
+        const PoseConstructor = await waitForPose()
+        console.log('Found MediaPipe Pose constructor:', PoseConstructor)
+        
+        // Create the pose instance
+        const pose = new PoseConstructor({
+          locateFile: (file: string) => {
+            console.log(`Loading MediaPipe file: ${file}`)
             return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
           }
         })
         
+        console.log('Setting Pose options...')
         pose.setOptions({
           modelComplexity: 1,
           smoothLandmarks: true,
@@ -76,25 +144,33 @@ const CameraDetector: React.FC = () => {
           minTrackingConfidence: DETECTION_CONFIDENCE
         })
         
+        console.log('Setting onResults handler...')
         pose.onResults(onPoseResults)
         
         poseRef.current = pose
         setIsLoading(false)
+        console.log('MediaPipe Pose initialized successfully')
         toast('Pose detection ready', { type: 'success' })
       } catch (err) {
         console.error('Failed to initialize Pose:', err)
-        setErrorMessage('Failed to load pose detection. Please try again.')
-        setCameraEnabled(false)
-        setIsLoading(false)
+        const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+        setErrorMessage(`Error initializing pose detection: ${errorMsg}`)
+        setCameraEnabled(false) // turn off camera on error
+        toast('Failed to initialize pose detection', { type: 'error' })
       }
     }
     
-    loadPose()
+    // Add a small delay before loading Pose to ensure webcam is initialized
+    const timer = setTimeout(() => {
+      console.log('Starting Pose loading sequence...')
+      loadPose()
+    }, 1000)
     
     return () => {
+      clearTimeout(timer)
       if (poseRef.current) {
+        console.log('Cleaning up Pose instance')
         poseRef.current.close()
-        poseRef.current = null
       }
     }
   }, [cameraEnabled, setCameraEnabled, toast])
@@ -103,142 +179,140 @@ const CameraDetector: React.FC = () => {
   useEffect(() => {
     let lastFrameTime = 0
     const frameDuration = 1000 / FPS
+    let errorCount = 0
+    const MAX_ERRORS = 5
     
-    const detectPose = async (timestamp: number) => {
-      if (!detectionActive || !poseRef.current || !webcamRef.current) {
+    const detectPose = (timestamp: number) => {
+      if (!poseRef.current || !webcamRef.current || !detectionActive) {
         requestRef.current = requestAnimationFrame(detectPose)
         return
       }
       
-      // Throttle FPS
-      if (timestamp - lastFrameTime < frameDuration) {
+      const elapsed = timestamp - lastFrameTime
+      
+      // Throttle to target FPS
+      if (elapsed < frameDuration) {
         requestRef.current = requestAnimationFrame(detectPose)
         return
       }
       
       lastFrameTime = timestamp
       
-      const webcam = webcamRef.current.video
-      if (webcam && webcam.readyState === 4) {
-        try {
-          await poseRef.current.send({ image: webcam })
-        } catch (err) {
-          console.error('Error in pose detection:', err)
+      try {
+        const webcam = webcamRef.current.video
+        if (webcam && webcam.readyState === 4) {
+          poseRef.current.send({
+            image: webcam
+          })
+        }
+      } catch (err) {
+        console.error('Error in pose detection:', err)
+        errorCount++
+        
+        if (errorCount > MAX_ERRORS) {
+          console.error('Too many errors, stopping detection')
+          setDetectionActive(false)
+          toast('Pose detection stopped due to errors', { type: 'error' })
         }
       }
       
       requestRef.current = requestAnimationFrame(detectPose)
     }
     
-    if (cameraEnabled) {
+    if (cameraEnabled && !isLoading) {
+      console.log('Starting pose detection animation frame loop')
       requestRef.current = requestAnimationFrame(detectPose)
     }
     
     return () => {
+      console.log('Cleaning up pose detection loop')
       cancelAnimationFrame(requestRef.current)
     }
-  }, [cameraEnabled, detectionActive])
+  }, [cameraEnabled, detectionActive, isLoading, setDetectionActive, toast])
   
   // Handler for pose detection results
-  const onPoseResults = (results: any) => {
-    if (!results.poseLandmarks || !detectionActive) return
-    
-    const landmarks = results.poseLandmarks
-    
-    // Determine landmarks based on handedness
-    const wristLandmark = handedness === 'left' ? POSE_LANDMARKS.LEFT_WRIST : POSE_LANDMARKS.RIGHT_WRIST
-    const shoulderLandmark = handedness === 'left' ? POSE_LANDMARKS.LEFT_SHOULDER : POSE_LANDMARKS.RIGHT_SHOULDER
-
-    const targetWrist = landmarks[wristLandmark]
-    const targetShoulder = landmarks[shoulderLandmark]
-    
-    // Check if landmarks have sufficiently high confidence
-    if (!targetWrist || !targetShoulder ||
-        targetWrist.visibility < DETECTION_CONFIDENCE ||
-        targetShoulder.visibility < DETECTION_CONFIDENCE) {
+  const onPoseResults = (results?: any) => {
+    if (!results || !results.poseLandmarks || !detectionActive) {
       return
     }
     
-    // Get position relative to the shoulder
-    // For a right-handed golfer, a backswing moves wrist to the left (negative x relative to shoulder)
-    // For a left-handed golfer, a backswing moves wrist to the right (positive x relative to shoulder)
-    // We can normalize this by multiplying by -1 for left-handers if needed, or adjust thresholds.
-    // Current thresholds (BACKSWING_THRESHOLD, DOWNSWING_THRESHOLD) are positive, expecting decrease in X for backswing.
-    // Let's adjust wristPos.x so that for both handedness, backswing is a negative/decreasing X value.
-    let wristXRelativeToShoulder = targetWrist.x - targetShoulder.x
-    if (handedness === 'left') {
-      wristXRelativeToShoulder = -wristXRelativeToShoulder // Invert X-axis for left-handed
-    }
-
-    const wristPos = {
-      x: wristXRelativeToShoulder,
-      y: targetWrist.y - targetShoulder.y // Y-axis remains the same
+    // Get landmarks based on handedness
+    const isRightHanded = handedness === 'right'
+    const wristLandmark = isRightHanded 
+      ? results.poseLandmarks[LANDMARKS.RIGHT_WRIST]
+      : results.poseLandmarks[LANDMARKS.LEFT_WRIST]
+    
+    const shoulderLandmark = isRightHanded
+      ? results.poseLandmarks[LANDMARKS.RIGHT_SHOULDER]
+      : results.poseLandmarks[LANDMARKS.LEFT_SHOULDER]
+    
+    // Check if we have sufficient data
+    if (!wristLandmark || !shoulderLandmark || 
+        (wristLandmark.visibility !== undefined && wristLandmark.visibility < 0.5) || 
+        (shoulderLandmark.visibility !== undefined && shoulderLandmark.visibility < 0.5)) {
+      return
     }
     
-    // Handle different swing states
+    const wristPos = { x: wristLandmark.x, y: wristLandmark.y }
+    
     switch (swingState) {
       case 'ready':
-        // Save initial position as reference
+        // Start tracking from the current position
         startPositionRef.current = wristPos
         startSwing()
-        toast('Backswing detected', { type: 'info', duration: 1000 })
         break
         
       case 'backswing':
-        // Track maximum backswing position (wrist moving back and up)
-        if (maxBackswingRef.current) {
-          if (wristPos.x < maxBackswingRef.current.x) {
-            maxBackswingRef.current = wristPos
-          }
-          
-          // Check if forward motion is detected after backswing
-          const backswingMovement = Math.abs(maxBackswingRef.current.x - startPositionRef.current!.x)
-          const forwardMovement = wristPos.x - maxBackswingRef.current.x
-          
-          if (backswingMovement > BACKSWING_THRESHOLD && forwardMovement > 0.1) {
-            recordTransition()
-            toast('Transition detected', { type: 'info', duration: 1000 })
-          }
-        } else {
+        // Track for backswing detection (wrist moving horizontally away from body)
+        if (!startPositionRef.current) {
+          startPositionRef.current = wristPos
+          break
+        }
+        
+        // Check if wrist has moved enough horizontally in correct direction based on handedness
+        const backswingMovement = isRightHanded 
+          ? startPositionRef.current.x - wristPos.x // Right-handed: wrist moving left
+          : wristPos.x - startPositionRef.current.x // Left-handed: wrist moving right
+        
+        if (backswingMovement > BACKSWING_THRESHOLD) {
           maxBackswingRef.current = wristPos
+          recordTransition('top')
         }
         break
         
       case 'downswing':
-        // Check if downswing is complete
-        if (startPositionRef.current) {
-          // Check if wrist has moved down past starting position
-          const downswingComplete = wristPos.y > (startPositionRef.current.y + DOWNSWING_THRESHOLD)
-          
-          if (downswingComplete) {
-            finishSwing()
-            
-            // Reset tracking references
-            startPositionRef.current = null
-            maxBackswingRef.current = null
-          }
+        // Track for downswing detection (wrist moving back down)
+        if (!maxBackswingRef.current) {
+          maxBackswingRef.current = wristPos
+          break
         }
-        break
         
-      default:
+        // Check if wrist has moved down enough
+        const downswingMovement = wristPos.y - maxBackswingRef.current.y
+        
+        if (downswingMovement > DOWNSWING_THRESHOLD) {
+          // Complete swing and calculate tempo ratio
+          recordTransition('impact')
+          finishSwing()
+          
+          // Reset references for next swing
+          startPositionRef.current = null
+          maxBackswingRef.current = null
+        }
         break
     }
   }
   
   const handleToggleDetection = () => {
-    if (!cameraEnabled) {
-      setCameraEnabled(true)
-    }
-    setDetectionActive(!detectionActive)
-    
-    // Reset tracking when toggling detection
-    startPositionRef.current = null
-    maxBackswingRef.current = null
-    
-    if (!detectionActive) {
-      toast('Auto detection enabled', { type: 'info' })
+    if (detectionActive) {
+      setDetectionActive(false)
+      toast('Detection paused', { type: 'info' })
     } else {
-      toast('Auto detection disabled', { type: 'info' })
+      setDetectionActive(true)
+      // Reset swing state when starting detection
+      startPositionRef.current = null
+      maxBackswingRef.current = null
+      toast('Detection started', { type: 'success' })
     }
   }
   
@@ -246,82 +320,141 @@ const CameraDetector: React.FC = () => {
   useEffect(() => {
     if (!cameraEnabled) return
     
+    console.log('Checking camera permissions...')
+    
     const checkPermission = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        
         setHasPermission(true)
+        // Stop the test stream immediately
         stream.getTracks().forEach(track => track.stop())
       } catch (err) {
-        console.error('Camera permission denied:', err)
+        console.error('Camera permission error:', err)
         setHasPermission(false)
-        setErrorMessage('Camera permission denied. Please allow access to your camera.')
         setCameraEnabled(false)
+        toast('Camera access denied', { type: 'error' })
       }
     }
     
     checkPermission()
-  }, [cameraEnabled, setCameraEnabled])
+  }, [cameraEnabled, setCameraEnabled, selectedCameraDeviceId, toast])
+  
+  const renderDisabledView = () => {
+    return (
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          p: 4, 
+          my: 4, 
+          textAlign: 'center',
+          borderRadius: 2,
+          bgcolor: theme.palette.mode === 'light' ? 'grey.50' : 'grey.900'
+        }}
+      >
+        <Box sx={{ mb: 3 }}>
+          <Box 
+            sx={{ 
+              width: 64, 
+              height: 64, 
+              borderRadius: '50%', 
+              mx: 'auto',
+              mb: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'action.hover'
+            }}
+          >
+            <Videocam sx={{ fontSize: 32, color: 'text.secondary' }} />
+          </Box>
+          <Typography 
+            variant="body1" 
+            color="text.secondary" 
+            gutterBottom
+          >
+            Enable camera to detect your golf swing
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Videocam />}
+          onClick={() => setCameraEnabled(true)}
+          sx={{ px: 3, py: 1 }}
+        >
+          Enable Swing Detection Camera
+        </Button>
+      </Paper>
+    )
+  }
   
   if (!cameraEnabled) {
-    return (
-      <div className="text-center p-4">
-        <button 
-          onClick={() => setCameraEnabled(true)}
-          className="py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-            <path fillRule="evenodd" d="M14 5h1a2 2 0 012 2v6a2 2 0 01-2 2h-1V5z" clipRule="evenodd" />
-          </svg>
-          Enable Swing Detection Camera
-        </button>
-      </div>
-    )
+    return renderDisabledView();
   }
   
   if (hasPermission === false) {
     return (
-      <div className="text-center p-4 bg-red-50 text-red-600 rounded-md">
-        <p>Camera access denied. Please allow camera access in your browser settings and reload the page.</p>
-        <button 
-          onClick={() => setCameraEnabled(false)}
-          className="mt-2 py-1 px-3 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
-        >
-          Dismiss
-        </button>
-      </div>
+      <Alert 
+        severity="error" 
+        sx={{ borderRadius: 2, my: 2 }}
+        action={
+          <Button 
+            color="inherit" 
+            size="small"
+            onClick={() => setCameraEnabled(false)}
+          >
+            Dismiss
+          </Button>
+        }
+      >
+        Camera access denied. Please allow camera access in your browser settings and reload the page.
+      </Alert>
     )
   }
   
   if (isLoading) {
     return (
-      <div className="text-center p-4">
-        <svg className="inline-block animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p className="mt-2 text-gray-600">Loading pose detection...</p>
-      </div>
-    )
+      <Box sx={{ textAlign: 'center', p: 4 }}>
+        <CircularProgress size={40} thickness={4} color="primary" />
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          Loading pose detection...
+        </Typography>
+      </Box>
+    );
   }
   
   if (errorMessage) {
     return (
-      <div className="text-center p-4 bg-red-50 text-red-600 rounded-md">
-        <p>{errorMessage}</p>
-        <button 
-          onClick={() => setCameraEnabled(false)}
-          className="mt-2 py-1 px-3 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
-        >
-          Dismiss
-        </button>
-      </div>
+      <Alert 
+        severity="error" 
+        sx={{ borderRadius: 2, my: 2 }}
+        action={
+          <Button 
+            color="inherit" 
+            size="small"
+            onClick={() => setCameraEnabled(false)}
+          >
+            Dismiss
+          </Button>
+        }
+      >
+        {errorMessage}
+      </Alert>
     )
   }
   
   return (
-    <div className="mt-4 mb-4">
-      <div className={`relative overflow-hidden rounded-md ${detectionActive ? 'border-2 border-green-500' : 'border border-gray-300'}`}>
+    <Box sx={{ my: 3, position: 'relative' }}>
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: detectionActive ? `2px solid ${theme.palette.success.main}` : 'none',
+          position: 'relative'
+        }}
+      >
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -331,52 +464,74 @@ const CameraDetector: React.FC = () => {
               ? { deviceId: { exact: selectedCameraDeviceId }, width: { ideal: 640 }, height: { ideal: 360 } }
               : { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 360 } }
           }
-          className="w-full"
+          style={{ width: '100%', display: 'block' }}
         />
-        <div className="absolute top-2 right-2">
-          <div className={`w-3 h-3 rounded-full ${detectionActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
-        </div>
-      </div>
-      
-      <div className="flex justify-between mt-2">
-        <button
-          onClick={handleToggleDetection}
-          className={`py-2 px-4 rounded-md flex items-center gap-2 ${
-            detectionActive 
-              ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-              : 'bg-green-100 text-green-600 hover:bg-green-200'
-          }`}
+        <Box 
+          sx={{ 
+            position: 'absolute', 
+            top: 8, 
+            right: 8,
+            zIndex: 1
+          }}
         >
-          {detectionActive ? (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
-              </svg>
-              Stop Detection
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-              </svg>
-              Start Detection
-            </>
-          )}
-        </button>
+          <Chip
+            size="small"
+            color={detectionActive ? "success" : "default"}
+            label={detectionActive ? "Active" : "Inactive"}
+            icon={<FiberManualRecord sx={{ 
+              fontSize: 12,
+              animation: detectionActive ? 'pulse 1.5s infinite' : 'none',
+              '@keyframes pulse': {
+                '0%': { opacity: 1 },
+                '50%': { opacity: 0.4 },
+                '100%': { opacity: 1 },
+              }
+            }} />}
+          />
+        </Box>
+      </Paper>
+      
+      <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: 'space-between' }}>
+        <Button
+          variant={detectionActive ? "outlined" : "contained"}
+          color={detectionActive ? "error" : "success"}
+          onClick={handleToggleDetection}
+          startIcon={detectionActive ? <Stop /> : <PlayArrow />}
+          size="medium"
+        >
+          {detectionActive ? 'Stop Detection' : 'Start Detection'}
+        </Button>
         
-        <button
+        <Button
+          variant="outlined"
+          color="inherit"
+          startIcon={<VideocamOff />}
           onClick={() => setCameraEnabled(false)}
-          className="py-2 px-4 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+          size="medium"
         >
           Hide Camera
-        </button>
-      </div>
+        </Button>
+      </Stack>
       
-      <div className="mt-2 text-xs text-gray-500">
-        <p className="mb-1">Position yourself so your full upper body is visible.</p>
-        <p>Make your backswing and downswing at normal speed.</p>
-      </div>
-    </div>
+      <Paper 
+        variant="outlined"
+        sx={{ 
+          mt: 2, 
+          p: 1.5, 
+          borderRadius: 1,
+          bgcolor: theme.palette.mode === 'light' ? 'grey.50' : 'grey.900'  
+        }}
+      >
+        <Typography variant="caption" color="text.secondary" component="div">
+          <Box component="p" sx={{ mb: 0.5, fontWeight: 'medium' }}>
+            Position yourself so your full upper body is visible.
+          </Box>
+          <Box component="p" sx={{ m: 0 }}>
+            Make your backswing and downswing at normal speed.
+          </Box>
+        </Typography>
+      </Paper>
+    </Box>
   )
 }
 
