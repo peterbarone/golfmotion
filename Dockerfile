@@ -22,7 +22,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Set to production environment
-ENV NODE_ENV production
+#ENV NODE_ENV production
 
 # Create a non-root user to run the app
 RUN addgroup --system --gid 1001 nodejs \
