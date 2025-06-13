@@ -38,7 +38,7 @@ interface SwingStore {
   // Actions
   setSwingState: (state: SwingState) => void
   startSwing: () => void
-  recordTransition: () => void
+  recordTransition: (transitionType?: 'top' | 'impact') => void
   finishSwing: () => void
   resetSwing: () => void
   setShowHistory: (show: boolean) => void
@@ -85,7 +85,7 @@ export const useSwingStore = create<SwingStore>()(
         startTime: Date.now() 
       }),
       
-      recordTransition: () => {
+      recordTransition: (transitionType?: 'top' | 'impact') => {
         const now = Date.now()
         const back = (now - get().startTime) / 1000
         set({ 

@@ -65,8 +65,9 @@ export const Settings: React.FC = () => {
     getVideoDevices()
   }, [selectedCameraDeviceId, setSelectedCameraDeviceId]) // Dependency array needs thought
 
-  const handleCameraChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedCameraDeviceId(event.target.value || null)
+  const handleCameraChange = (event: any) => {
+    const deviceId = event.target.value as string
+    setSelectedCameraDeviceId(deviceId === '' ? null : deviceId)
   }
 
   const handleHandednessChange = (event: React.ChangeEvent<HTMLInputElement>) => {

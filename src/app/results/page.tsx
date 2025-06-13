@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -24,7 +24,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningIcon from "@mui/icons-material/Warning";
 import ErrorIcon from "@mui/icons-material/Error";
 
-export default function ResultsPage() {
+function ResultsContent() {
   const theme = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -176,5 +176,13 @@ export default function ResultsPage() {
         </Button>
       </Container>
     </Box>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</Box>}>
+      <ResultsContent />
+    </Suspense>
   );
 }
