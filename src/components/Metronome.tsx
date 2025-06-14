@@ -696,7 +696,7 @@ export default function MetronomeUI() {
       </Box>
 
       {/* Dial Control */}
-      <Box sx={{ mb: { xs: 3, sm: 4, md: 5 }, mt: { xs: -1.5, sm: -0.5, md: 0 }, position: 'relative' }}>
+      <Box sx={{ mb: { xs: 3, sm: 4, md: 5 }, mt: { xs: -5.25, sm: -4.25, md: -3.75 }, position: 'relative' }}>
         <Stack direction="row" justifyContent="center" alignItems="center" spacing={{ xs: 2, sm: 3, md: 4 }}>
           {/* Decrement Button with enhanced styling */}
           <IconButton 
