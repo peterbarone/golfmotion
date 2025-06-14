@@ -66,7 +66,7 @@ export default function PracticeAudioPage() {
         <IconButton 
           onClick={handleHelpClick}
           sx={{ 
-            bgcolor: 'rgba(255, 255, 255, 0.2)',
+            bgcolor: 'rgba(255, 255, 255, 0.82)',
             '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' }
           }}
           aria-label="Help"

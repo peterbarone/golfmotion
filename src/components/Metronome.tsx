@@ -368,7 +368,7 @@ export default function MetronomeUI() {
         justifyContent: 'center', 
         alignItems: 'center',
         width: '100%',
-        px: { xs: 0.5, sm: 2 },
+        px: { xs: 0.9, sm: 2 },
         zIndex: 10
       }}>
         <Box sx={{ 
@@ -391,9 +391,9 @@ export default function MetronomeUI() {
           <Chip 
             icon={<SportsGolfIcon sx={{ 
               transform: swingPhase === 'backswing' ? 'rotate(-45deg)' : 'none',
-              fontSize: { xs: '0.8rem', sm: '1.2rem' } 
+              fontSize: { xs: '1.0rem', sm: '1.5rem' } 
             }} />}
-            label="BACKSWING" 
+            label="BACK" 
             sx={{ 
               bgcolor: swingPhase === 'backswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
               color: swingPhase === 'backswing' ? '#1b4332' : '#ffffff',
@@ -402,10 +402,11 @@ export default function MetronomeUI() {
               boxShadow: swingPhase === 'backswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
               py: { xs: 0.75, sm: 1.5, md: 2.5 },
               height: 'auto',
+              width: '130px',
               border: swingPhase === 'backswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: { xs: 0.75, sm: 1.5 },
-                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.9rem' }
+                px: { xs: 1.75, sm: 2.5 },
+                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
               }
             }} 
           />
@@ -415,16 +416,16 @@ export default function MetronomeUI() {
             mx: { xs: 0.1, sm: 0.5 },
             opacity: 0.8,
             letterSpacing: '0.05em',
-            fontSize: { xs: '0.8rem', sm: '1.25rem' }
+            fontSize: { xs: '3rem', sm: '3rem' }
           }}>
             :
           </Typography>
           <Chip 
             icon={<SportsGolfIcon sx={{ 
               transform: swingPhase === 'downswing' ? 'rotate(45deg)' : 'none',
-              fontSize: { xs: '0.8rem', sm: '1.2rem' } 
+              fontSize: { xs: '1.0rem', sm: '1.5rem' } 
             }} />}
-            label="DOWNSWING" 
+            label="DOWN" 
             sx={{ 
               bgcolor: swingPhase === 'downswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
               color: swingPhase === 'downswing' ? '#1b4332' : '#ffffff',
@@ -433,10 +434,11 @@ export default function MetronomeUI() {
               boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
               py: { xs: 0.75, sm: 1.5, md: 2.5 },
               height: 'auto',
+              width: '130px',
               border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
                 px: { xs: 0.75, sm: 1.5 },
-                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.9rem' }
+                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
               }
             }} 
           />
@@ -452,8 +454,8 @@ export default function MetronomeUI() {
           </Typography>
           <Chip 
             icon={<SportsGolfIcon sx={{ 
-              transform: 'rotate(90deg)',
-              fontSize: { xs: '0.8rem', sm: '1.2rem' } 
+              transform: 'none',
+              fontSize: { xs: '1.0rem', sm: '1.5rem' } 
             }} />}
             label="HIT" 
             sx={{ 
@@ -464,10 +466,11 @@ export default function MetronomeUI() {
               boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
               py: { xs: 0.75, sm: 1.5, md: 2.5 },
               height: 'auto',
+              width: '130px',
               border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
                 px: { xs: 0.75, sm: 1.5 },
-                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.9rem' }
+                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
               }
             }} 
           />
@@ -478,7 +481,7 @@ export default function MetronomeUI() {
       <Box sx={{ 
         borderRadius: { xs: 2, sm: 4 }, 
         p: { xs: 1.5, sm: 3, md: 4 }, 
-        mt: { xs: 5, sm: 7, md: 8 },
+        mt: { xs: 1.5, sm: 3, md: 4 },
         mb: { xs: 1.5, sm: 3, md: 4 }, 
         width: { xs: '95%', sm: '85%' }, 
         maxWidth: 650,
