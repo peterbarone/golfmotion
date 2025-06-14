@@ -69,28 +69,24 @@ export default function PracticeVideoPage() {
          sx={{
            width: '100vw',
            height: '100vh',
-           background: 'linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%)', /* Rich gradient background */
+           background: 'black', /* Dark background for full-screen camera view */
            display: 'flex',
-           flexDirection: 'column',
-           alignItems: 'center',
-           justifyContent: 'center',
-           p: 3,
-           fontFamily: '"Inter", "Outfit", "Roboto", "Helvetica", sans-serif',
            overflow: 'hidden',
-           position: 'relative',
-           '&::after': {
-             content: '""',
-             position: 'absolute',
-             top: 0,
-             left: 0,
-             right: 0,
-             bottom: 0,
-             background: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
-             pointerEvents: 'none',
-             zIndex: 1
-           }
+           position: 'relative'
          }}
        >
+      {/* Full screen camera view */}
+      <Box sx={{ 
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 1
+      }}>
+        <CameraDetector />
+      </Box>
+      
       {/* Help button - top right */}
       <Box sx={{ 
         position: 'absolute', 
@@ -99,18 +95,17 @@ export default function PracticeVideoPage() {
         zIndex: 10 
       }}>
         <IconButton 
-          onClick={handleHelpClick}
+          onClick={handleHelpClick} 
           sx={{ 
             bgcolor: 'rgba(255, 255, 255, 0.2)',
-            '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' }
+            color: 'white',
+            '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' } 
           }}
-          aria-label="Help"
         >
           <HelpOutlineIcon />
         </IconButton>
       </Box>
-      
-      {/* Toast/Snackbar for help information */}
+
       <Snackbar
         open={toastOpen}
         autoHideDuration={10000}
@@ -118,22 +113,20 @@ export default function PracticeVideoPage() {
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         TransitionComponent={Fade}
       >
-        <Alert 
-          onClose={handleCloseToast} 
-          severity="info" 
-          variant="filled"
+        <Alert
+          severity="info"
           sx={{ 
-            width: '100%',
-            maxWidth: '500px',
-            '& .MuiAlert-message': { width: '100%' }
+            width: '100%', 
+            maxWidth: 500,
+            boxShadow: 3
           }}
         >
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Audio & Video Practice Guide
+            How to Use Practice Video
           </Typography>
-          <Stack spacing={0.5}>
+          <Stack spacing={1}>
             {helpInfo.map((tip, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body2" component="div" sx={{ pl: 0.5 }}>
                   • {tip}
                 </Typography>
@@ -143,112 +136,57 @@ export default function PracticeVideoPage() {
         </Alert>
       </Snackbar>
 
-      {/* Main content area */}
+      {/* Tempo section - black overlay with 45% opacity on the right */}
       <Box sx={{ 
-        flexGrow: 1,
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: { xs: '40%', md: '30%' },
+        maxWidth: '360px',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+        backdropFilter: 'blur(8px)',
+        boxShadow: '-5px 0 15px rgba(0, 0, 0, 0.2)',
+        padding: 2,
+        overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
-        p: 2
+        zIndex: 5
       }}>
-        <Box sx={{ 
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          height: '100%',
-          gap: 2
+        <Typography variant="h6" sx={{ 
+          color: 'white',
+          fontWeight: 600,
+          mb: 2,
+          textAlign: 'center'
         }}>
-          {/* Full screen camera view */}
-          <Box sx={{ 
-            width: '100%',
-            flex: 2,
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            <Paper elevation={2} sx={{ 
-              overflow: 'hidden',
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%'
-            }}>
-              <AppBar position="static" sx={{ 
-                bgcolor: 'primary.main',
-                borderTopLeftRadius: 2, 
-                borderTopRightRadius: 2
-              }}>
-                <Toolbar variant="dense">
-                  <Typography variant="subtitle1" sx={{ 
-                    flexGrow: 1, 
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    fontSize: '0.95rem'
-                  }}>
-                    Record Your Swing
-                  </Typography>
-                  <IconButton color="inherit" onClick={resetSwing} size="small" sx={{ color: '#fff' }}>
-                    <RefreshIcon />
-                  </IconButton>
-                </Toolbar>
-              </AppBar>
-              <Box sx={{ 
-                p: 1, 
-                flexGrow: 1, 
-                display: 'flex', 
-                flexDirection: 'column',
-                position: 'relative'
-              }}>
-                <CameraDetector />
-              </Box>
-            </Paper>
-          </Box>
-          
-          {/* Swing Analysis - takes up less space now */}
-          <Box sx={{ 
-            width: '100%',
-            flex: 1,
-            display: { xs: 'flex', sm: 'flex' },
-            flexDirection: 'column'
-          }}>
-            <Paper elevation={2} sx={{ 
-              overflow: 'hidden',
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%'
-            }}>
-              <AppBar position="static" sx={{ 
-                bgcolor: 'primary.main',
-                borderTopLeftRadius: 2, 
-                borderTopRightRadius: 2
-              }}>
-                <Toolbar variant="dense">
-                  <Typography variant="subtitle1" sx={{ 
-                    flexGrow: 1, 
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    fontSize: '0.95rem'
-                  }}>
-                    Real-time Analysis
-                  </Typography>
-                </Toolbar>
-              </AppBar>
-              <Box sx={{ p: 1, flexGrow: 1, overflow: 'auto' }}>
-                <SwingDisplay />
-              </Box>
-            </Paper>
-          </Box>
+          Real-time Analysis
+        </Typography>
+        
+        <Box sx={{ flexGrow: 1, overflow: 'auto', color: 'white' }}>
+          <SwingDisplay />
         </Box>
+        
+        <IconButton 
+          onClick={resetSwing} 
+          size="small" 
+          sx={{ 
+            alignSelf: 'flex-end', 
+            mt: 1, 
+            color: 'white',
+            '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+          }}
+        >
+          <RefreshIcon />
+        </IconButton>
       </Box>
 
-      {/* Start button above navigation */}
+      {/* Start/Stop button at bottom center */}
       <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        py: 2,
-        borderTop: 1,
-        borderColor: 'divider'
+        position: 'absolute',
+        bottom: 30,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 10
       }}>
         <Button
           variant="contained"
@@ -260,10 +198,12 @@ export default function PracticeVideoPage() {
             px: 4, 
             py: 1.5, 
             borderRadius: 28,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            minWidth: '200px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
           }}
         >
-          {isRecording ? "Stop Recording" : "Start Recording"}
+          {isRecording ? "Stop" : "Start"}
         </Button>
       </Box>
     </Box>

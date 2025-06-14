@@ -325,10 +325,7 @@ export default function MetronomeUI() {
     }
   }, [tempo, meter, isPlaying, runMetronome]);
 
-  const handleTap = () => {
-    // Tap tempo logic could be added here
-    console.log('Tap tempo clicked');
-  };
+  // TAP button functionality moved to /find-my-tempo page
 
   const decreaseTempo = () => setTempo((t) => Math.max(MIN_TEMPO, t - 1));
   const increaseTempo = () => setTempo((t) => Math.min(MAX_TEMPO, t + 1));
@@ -827,26 +824,7 @@ export default function MetronomeUI() {
       </Box>
 
       {/* Tempo slider removed as requested */}
-
-      {/* Tap Button */}
-      <Button 
-        variant="contained" 
-        onClick={handleTap} 
-        sx={{ 
-          background: 'linear-gradient(45deg, #8c9eff 30%, #4fc3f7 90%)',
-          boxShadow: '0 3px 10px rgba(140,158,255,0.4)',
-          color: '#FFFFFF', 
-          fontWeight: 'bold', 
-          px: { xs: 4, sm: 6 }, 
-          py: { xs: 1, sm: 1.5 }, 
-          fontSize: { xs: '0.85rem', sm: '1rem' },
-          borderRadius: '30px',
-          '&:hover': {
-            background: 'linear-gradient(45deg, #7986cb 30%, #29b6f6 90%)',
-          }
-        }}>
-        TAP
-      </Button>
+      {/* TAP button moved to /find-my-tempo page */}
       
       {/* Debug information (only visible during development) */}
       {process.env.NODE_ENV === 'development' && (

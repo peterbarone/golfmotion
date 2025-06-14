@@ -133,6 +133,24 @@ export default function Home() {
               Practice with Video
             </Button>
           </Box>
+
+           {/* Find Your Tempo*/}
+           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={() => router.push('/find-my-tempo')}
+              sx={{ 
+                px: 6,
+                py: 1.5,
+                fontSize: '1.1rem',
+                minWidth: '280px',
+                fontWeight: 'bold'
+              }}
+            >
+              Find Your Tempo
+            </Button>
+          </Box>
         </Stack>
         
         {/* Settings Button - smaller, less prominent */}

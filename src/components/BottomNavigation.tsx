@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, BottomNavigation as MUIBottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { Home as HomeIcon, Mic as MicIcon, Videocam as VideocamIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import { Home as HomeIcon, Mic as MicIcon, Videocam as VideocamIcon, Settings as SettingsIcon, Timer as TimerIcon } from '@mui/icons-material';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function BottomNavigation() {
@@ -14,7 +14,8 @@ export default function BottomNavigation() {
     if (pathname === '/') return 0;
     if (pathname.startsWith('/practice-audio')) return 1;
     if (pathname.startsWith('/practice-video')) return 2;
-    if (pathname.startsWith('/settings')) return 3;
+    if (pathname.startsWith('/find-my-tempo')) return 3;
+    if (pathname.startsWith('/settings')) return 4;
     return 0;
   };
 
@@ -30,6 +31,9 @@ export default function BottomNavigation() {
         router.push('/practice-video');
         break;
       case 3:
+        router.push('/find-my-tempo');
+        break;
+      case 4:
         router.push('/settings');
         break;
       default:
@@ -78,6 +82,7 @@ export default function BottomNavigation() {
           <BottomNavigationAction label="Home" icon={<HomeIcon />} />
           <BottomNavigationAction label="Audio" icon={<MicIcon />} />
           <BottomNavigationAction label="Video" icon={<VideocamIcon />} />
+          <BottomNavigationAction label="Tempo" icon={<TimerIcon />} />
           <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
         </MUIBottomNavigation>
       </Paper>
