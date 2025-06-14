@@ -452,28 +452,6 @@ export default function MetronomeUI() {
           }}>
             :
           </Typography>
-          <Chip 
-            icon={<SportsGolfIcon sx={{ 
-              transform: 'none',
-              fontSize: { xs: '1.0rem', sm: '1.5rem' } 
-            }} />}
-            label="HIT" 
-            sx={{ 
-              bgcolor: swingPhase === 'downswing' ? '#ffffff' : 'rgba(255,255,255,0.1)', 
-              color: swingPhase === 'downswing' ? '#1b4332' : '#ffffff',
-              fontWeight: swingPhase === 'downswing' ? 700 : 400,
-              transition: 'all 0.3s ease',
-              boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: { xs: 0.75, sm: 1.5, md: 2.5 },
-              height: 'auto',
-              width: '130px',
-              border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
-              '& .MuiChip-label': {
-                px: { xs: 0.75, sm: 1.5 },
-                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' }
-              }
-            }} 
-          />
         </Box>
       </Box>
       
