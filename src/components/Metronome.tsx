@@ -573,8 +573,7 @@ export default function MetronomeUI() {
                 boxShadow: '0 0 10px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(255, 255, 255, 0.5)'
               }} />
             </Box>
-          </Box>
-        </Stack>
+          </Box>        </Stack>
       </Box>
       
       {/* Preset Buttons */}
@@ -760,20 +759,7 @@ export default function MetronomeUI() {
               opacity: 0.6
             }} />
             
-            {/* Tick marks for the dial */}
-            {[...Array(12)].map((_, i) => (
-              <Box 
-                key={i} 
-                sx={{
-                  position: 'absolute',
-                  width: 2,
-                  height: i % 3 === 0 ? 12 : 8,
-                  backgroundColor: i % 3 === 0 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)',
-                  transform: `rotate(${i * 30}deg) translateY(-108px)`,
-                  transformOrigin: 'bottom center'
-                }}
-              />
-            ))}
+            {/* Tick marks removed */}
             
             {/* Golf swing timing marks - specifically for 3:1 timing */}
             <Box sx={{ 
@@ -783,46 +769,7 @@ export default function MetronomeUI() {
               borderRadius: '50%',
               pointerEvents: 'none'
             }}>
-              <Typography 
-                sx={{ 
-                  position: 'absolute', 
-                  top: { xs: 15, sm: 18, md: 20 }, 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  color: 'rgba(255,255,255,0.6)',
-                  fontWeight: 600,
-                  fontSize: '0.8rem'
-                }}
-              >
-                1
-              </Typography>
-              <Typography 
-                sx={{ 
-                  position: 'absolute', 
-                  right: { xs: 15, sm: 18, md: 20 }, 
-                  top: '50%', 
-                  transform: 'translateY(-50%)',
-                  color: 'rgba(255,255,255,0.6)',
-                  fontWeight: 600,
-                  fontSize: '0.8rem'
-                }}
-              >
-                2
-              </Typography>
-              <Typography 
-                sx={{ 
-                  position: 'absolute', 
-                  bottom: { xs: 15, sm: 18, md: 20 }, 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  color: 'rgba(255,255,255,0.6)',
-                  fontWeight: 600,
-                  fontSize: '0.8rem'
-                }}
-              >
-                3
-              </Typography>
-              {/* "GO" label removed */}
+              {/* Numbers 1, 2, 3 removed from the dial */}
             </Box>
             
             {/* Green indicator line and base dot removed */}
