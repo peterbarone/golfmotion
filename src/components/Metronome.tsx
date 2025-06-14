@@ -657,6 +657,7 @@ export default function MetronomeUI() {
                 py: 1.2,
                 px: { xs: 1, sm: 2 },
                 height: { xs: 50, sm: 64 },
+                mb: 1.25, // 5px of bottom margin
                 color: '#ffffff',
                 bgcolor: isActive ? activeBackgroundColor : 'transparent',
                 borderColor: '#ffffff',
@@ -696,7 +697,7 @@ export default function MetronomeUI() {
       </Box>
 
       {/* Dial Control */}
-      <Box sx={{ mb: { xs: 3, sm: 4, md: 5 }, mt: { xs: 1, sm: 1.5, md: 2 }, position: 'relative' }}>
+      <Box sx={{ mb: { xs: 3, sm: 4, md: 5 }, mt: { xs: -1.5, sm: -0.5, md: 0 }, position: 'relative' }}>
         <Stack direction="row" justifyContent="center" alignItems="center" spacing={{ xs: 2, sm: 3, md: 4 }}>
           {/* Decrement Button with enhanced styling */}
           <IconButton 
