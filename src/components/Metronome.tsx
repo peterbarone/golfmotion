@@ -363,12 +363,12 @@ export default function MetronomeUI() {
       {/* Swing Phase Indicator */}
       <Box sx={{ 
         position: 'absolute', 
-        top: { xs: 15, sm: 30 }, 
+        top: { xs: 8, sm: 30 }, 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
         width: '100%',
-        px: { xs: 1, sm: 2 },
+        px: { xs: 0.5, sm: 2 },
         zIndex: 10
       }}>
         <Box sx={{ 
@@ -376,21 +376,22 @@ export default function MetronomeUI() {
           alignItems: 'center',
           flexWrap: { xs: 'wrap', md: 'nowrap' },
           justifyContent: 'center',
-          gap: { xs: 1, sm: 1.5, md: 2 },
-          px: { xs: 1.5, sm: 2, md: 3 },
-          py: { xs: 1, sm: 1.5 },
-          borderRadius: { xs: 3, sm: 5 },
+          gap: { xs: 0.5, sm: 1.5, md: 2 },
+          px: { xs: 1, sm: 2, md: 3 },
+          py: { xs: 0.5, sm: 1.5 },
+          borderRadius: { xs: 2, sm: 5 },
           backdropFilter: 'blur(8px)',
           backgroundColor: 'rgba(255,255,255,0.08)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
           border: '1px solid rgba(255,255,255,0.1)',
-          maxWidth: '95%'
+          maxWidth: '95%',
+          transform: { xs: 'scale(0.85)', sm: 'scale(1)' }
         }}>
 
           <Chip 
             icon={<SportsGolfIcon sx={{ 
               transform: swingPhase === 'backswing' ? 'rotate(-45deg)' : 'none',
-              fontSize: { xs: '1rem', sm: '1.2rem' } 
+              fontSize: { xs: '0.8rem', sm: '1.2rem' } 
             }} />}
             label="BACKSWING" 
             sx={{ 
@@ -399,29 +400,29 @@ export default function MetronomeUI() {
               fontWeight: swingPhase === 'backswing' ? 700 : 400,
               transition: 'all 0.3s ease',
               boxShadow: swingPhase === 'backswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: { xs: 1.5, sm: 2, md: 2.5 },
+              py: { xs: 0.75, sm: 1.5, md: 2.5 },
               height: 'auto',
               border: swingPhase === 'backswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' }
+                px: { xs: 0.75, sm: 1.5 },
+                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.9rem' }
               }
             }} 
           />
           <Typography variant="h5" sx={{ 
             color: '#ffffff', 
             fontWeight: 300,
-            mx: { xs: 0.2, sm: 0.5 },
+            mx: { xs: 0.1, sm: 0.5 },
             opacity: 0.8,
             letterSpacing: '0.05em',
-            fontSize: { xs: '1rem', sm: '1.25rem' }
+            fontSize: { xs: '0.8rem', sm: '1.25rem' }
           }}>
             :
           </Typography>
           <Chip 
             icon={<SportsGolfIcon sx={{ 
               transform: swingPhase === 'downswing' ? 'rotate(45deg)' : 'none',
-              fontSize: { xs: '1rem', sm: '1.2rem' } 
+              fontSize: { xs: '0.8rem', sm: '1.2rem' } 
             }} />}
             label="DOWNSWING" 
             sx={{ 
@@ -430,29 +431,29 @@ export default function MetronomeUI() {
               fontWeight: swingPhase === 'downswing' ? 700 : 400,
               transition: 'all 0.3s ease',
               boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: { xs: 1.5, sm: 2, md: 2.5 },
+              py: { xs: 0.75, sm: 1.5, md: 2.5 },
               height: 'auto',
               border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' }
+                px: { xs: 0.75, sm: 1.5 },
+                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.9rem' }
               }
             }} 
           />
           <Typography variant="h5" sx={{ 
             color: '#ffffff', 
             fontWeight: 300,
-            mx: { xs: 0.2, sm: 0.5 },
+            mx: { xs: 0.1, sm: 0.5 },
             opacity: 0.8,
             letterSpacing: '0.05em',
-            fontSize: { xs: '1rem', sm: '1.25rem' }
+            fontSize: { xs: '0.8rem', sm: '1.25rem' }
           }}>
             :
           </Typography>
           <Chip 
             icon={<SportsGolfIcon sx={{ 
               transform: 'rotate(90deg)',
-              fontSize: { xs: '1rem', sm: '1.2rem' } 
+              fontSize: { xs: '0.8rem', sm: '1.2rem' } 
             }} />}
             label="HIT" 
             sx={{ 
@@ -461,12 +462,12 @@ export default function MetronomeUI() {
               fontWeight: swingPhase === 'downswing' ? 700 : 400,
               transition: 'all 0.3s ease',
               boxShadow: swingPhase === 'downswing' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-              py: { xs: 1.5, sm: 2, md: 2.5 },
+              py: { xs: 0.75, sm: 1.5, md: 2.5 },
               height: 'auto',
               border: swingPhase === 'downswing' ? 'none' : '1px solid rgba(255,255,255,0.2)',
               '& .MuiChip-label': {
-                px: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' }
+                px: { xs: 0.75, sm: 1.5 },
+                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.9rem' }
               }
             }} 
           />
@@ -475,19 +476,20 @@ export default function MetronomeUI() {
       
       {/* Display Panel */}
       <Box sx={{ 
-        borderRadius: { xs: 3, sm: 4 }, 
-        p: { xs: 2, sm: 3, md: 4 }, 
-        mt: { xs: 6, sm: 7, md: 8 },
-        mb: { xs: 2, sm: 3, md: 4 }, 
-        width: { xs: '92%', sm: '85%' }, 
+        borderRadius: { xs: 2, sm: 4 }, 
+        p: { xs: 1.5, sm: 3, md: 4 }, 
+        mt: { xs: 5, sm: 7, md: 8 },
+        mb: { xs: 1.5, sm: 3, md: 4 }, 
+        width: { xs: '95%', sm: '85%' }, 
         maxWidth: 650,
         background: 'rgba(255, 255, 255, 0.08)',
         backdropFilter: 'blur(10px)',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
-        border: '1px solid rgba(255, 255, 255, 0.12)'
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        transform: { xs: 'scale(0.95)', sm: 'scale(1)' }
       }}>
         <Stack spacing={2.5}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: { xs: 0.5, sm: 1 } }}>
             <Typography 
               variant="overline" 
               sx={{ 
@@ -524,7 +526,7 @@ export default function MetronomeUI() {
                 variant="h1" 
                 sx={{ 
                   color: '#ffffff', 
-                  fontSize: '6rem',
+                  fontSize: { xs: '4.5rem', sm: '6rem' },
                   fontWeight: 800,
                   letterSpacing: '-0.05em',
                   textShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
@@ -544,8 +546,9 @@ export default function MetronomeUI() {
                 color: 'rgba(255, 255, 255, 0.7)', 
                 fontWeight: 300,
                 textAlign: 'center',
-                maxWidth: '80%',
-                fontStyle: 'italic'
+                maxWidth: '90%',
+                fontStyle: 'italic',
+                fontSize: { xs: '0.7rem', sm: '0.875rem' }
               }}
             >
               {tempoRatio === '3:1' ? '3 count backswing : 1 count downswing (Tour Pro)' : 
@@ -598,13 +601,14 @@ export default function MetronomeUI() {
         display: 'flex',
         justifyContent: 'center',
         flexWrap: 'wrap',
-        gap: { xs: 1, sm: 1.5, md: 2 },
-        mb: { xs: 1.5, sm: 2, md: 3 },
-        mt: { xs: 1, sm: 1.5, md: 2 },
-        px: { xs: 1, sm: 1.5, md: 2 },
+        gap: { xs: 0.5, sm: 1.5, md: 2 },
+        mb: { xs: 1, sm: 2, md: 3 },
+        mt: { xs: 0.5, sm: 1.5, md: 2 },
+        px: { xs: 0.5, sm: 1.5, md: 2 },
         '& > *': { 
           flex: '1 1 auto',
-          minWidth: { xs: '40%', sm: 'auto' }
+          minWidth: { xs: '45%', sm: 'auto' },
+          maxWidth: { xs: '45%', sm: 'none' }
         }
       }}>
         {TEMPO_PRESETS.map((preset) => {
@@ -613,19 +617,19 @@ export default function MetronomeUI() {
             switch(preset.name) {
               case "Tour Pro": 
                 return <SportsGolfIcon sx={{ 
-                  fontSize: '1.4rem', 
+                  fontSize: { xs: '1rem', sm: '1.4rem' }, 
                   transform: 'rotate(-15deg)',
                   color: '#ffffff'
                 }} />;
               case "Smooth Swing": 
                 return <SportsGolfIcon sx={{ 
-                  fontSize: '1.4rem', 
+                  fontSize: { xs: '1rem', sm: '1.4rem' }, 
                   transform: 'rotate(15deg)',
                   color: '#ffffff'
                 }} />;
               case "Power Swing": 
                 return <SportsGolfIcon sx={{ 
-                  fontSize: '1.4rem', 
+                  fontSize: { xs: '1rem', sm: '1.4rem' }, 
                   transform: 'rotate(45deg)',
                   color: '#ffffff'
                 }} />;
@@ -664,8 +668,8 @@ export default function MetronomeUI() {
                 minWidth: 0,
                 maxWidth: 160,
                 py: 1.2,
-                px: 2,
-                height: 64,
+                px: { xs: 1, sm: 2 },
+                height: { xs: 50, sm: 64 },
                 color: '#ffffff',
                 bgcolor: isActive ? activeBackgroundColor : 'transparent',
                 borderColor: '#ffffff',
@@ -715,10 +719,10 @@ export default function MetronomeUI() {
               bgcolor: 'rgba(255,255,255,0.12)',
               boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
               border: '2px solid rgba(255,255,255,0.2)',
-              p: { xs: 1, sm: 1.5 },
+              p: { xs: 0.75, sm: 1.5 },
               transition: 'all 0.2s ease',
-              width: { xs: 45, sm: 52, md: 60 },
-              height: { xs: 45, sm: 52, md: 60 },
+              width: { xs: 40, sm: 52, md: 60 },
+              height: { xs: 40, sm: 52, md: 60 },
               '&:hover': {
                 bgcolor: 'rgba(255,255,255,0.2)',
                 transform: 'scale(1.1)'
@@ -736,8 +740,8 @@ export default function MetronomeUI() {
             ref={dialRef}
             onMouseDown={handleMouseDown}
             sx={{
-              width: { xs: 180, sm: 220, md: 240 },
-              height: { xs: 180, sm: 220, md: 240 },
+              width: { xs: 150, sm: 220, md: 240 },
+              height: { xs: 150, sm: 220, md: 240 },
               borderRadius: '50%',
               background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
               border: '2px solid rgba(255,255,255,0.15)',
@@ -869,8 +873,10 @@ export default function MetronomeUI() {
               bgcolor: 'rgba(255,255,255,0.12)',
               boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
               border: '2px solid rgba(255,255,255,0.2)',
-              p: 1.5,
+              p: { xs: 0.75, sm: 1.5 },
               transition: 'all 0.2s ease',
+              width: { xs: 40, sm: 52, md: 60 },
+              height: { xs: 40, sm: 52, md: 60 },
               '&:hover': {
                 bgcolor: 'rgba(255,255,255,0.2)',
                 transform: 'scale(1.1)'
@@ -896,9 +902,9 @@ export default function MetronomeUI() {
           boxShadow: '0 3px 10px rgba(140,158,255,0.4)',
           color: '#FFFFFF', 
           fontWeight: 'bold', 
-          px: 6, 
-          py: 1.5, 
-          fontSize: '1rem',
+          px: { xs: 4, sm: 6 }, 
+          py: { xs: 1, sm: 1.5 }, 
+          fontSize: { xs: '0.85rem', sm: '1rem' },
           borderRadius: '30px',
           '&:hover': {
             background: 'linear-gradient(45deg, #7986cb 30%, #29b6f6 90%)',
