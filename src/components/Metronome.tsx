@@ -586,10 +586,12 @@ export default function MetronomeUI() {
         mb: { xs: 1, sm: 2, md: 3 },
         mt: { xs: 0.5, sm: 1.5, md: 2 },
         px: { xs: 0.5, sm: 1.5, md: 2 },
+        width: '100%',
         '& > *': { 
           flex: '1 1 auto',
-          minWidth: { xs: '45%', sm: 'auto' },
-          maxWidth: { xs: '45%', sm: 'none' }
+          minWidth: '45%', // Always 45% width regardless of screen size
+          maxWidth: '45%', // Always 45% width regardless of screen size
+          mb: { xs: 1, sm: 1.5 } // Add some bottom margin for consistent spacing
         }
       }}>
         {TEMPO_PRESETS.map((preset) => {
@@ -600,24 +602,28 @@ export default function MetronomeUI() {
                 return <SportsGolfIcon sx={{ 
                   fontSize: { xs: '1rem', sm: '1.4rem' }, 
                   transform: 'rotate(-15deg)',
+                  mb: { xs: 0.5, sm: 1 },
                   color: '#ffffff'
                 }} />;
               case "Smooth Swing": 
                 return <SportsGolfIcon sx={{ 
                   fontSize: { xs: '1rem', sm: '1.4rem' }, 
                   transform: 'rotate(15deg)',
+                  mb: { xs: 0.5, sm: 1 },
                   color: '#ffffff'
                 }} />;
               case "Power Swing": 
                 return <SportsGolfIcon sx={{ 
                   fontSize: { xs: '1rem', sm: '1.4rem' }, 
                   transform: 'rotate(45deg)',
+                  mb: { xs: 0.5, sm: 1 },
                   color: '#ffffff'
                 }} />;
               case "Beginner":
                 return <GolfCourseIcon sx={{ 
                   fontSize: '1.4rem',
                   transform: 'scale(0.85)',
+                  mb: { xs: 0.5, sm: 1 },
                   color: '#ffffff'
                 }} />;
               default:
