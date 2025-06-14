@@ -529,7 +529,7 @@ export default function MetronomeUI() {
                 textAlign: 'center',
                 maxWidth: '90%',
                 fontStyle: 'italic',
-                fontSize: { xs: '0.7rem', sm: '0.875rem' }
+                fontSize: { xs: '1.0rem', sm: '1.25rem' }
               }}
             >
               {tempoRatio === '3:1' ? '3 count backswing : 1 count downswing (Tour Pro)' : 
@@ -727,8 +727,8 @@ export default function MetronomeUI() {
             ref={dialRef}
             onMouseDown={handleMouseDown}
             sx={{
-              width: { xs: 150, sm: 220, md: 240 },
-              height: { xs: 150, sm: 220, md: 240 },
+              width: { xs: 120, sm: 165, md: 180 },
+              height: { xs: 120, sm: 165, md: 180 },
               borderRadius: '50%',
               background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
               border: '2px solid rgba(255,255,255,0.15)',
@@ -785,7 +785,7 @@ export default function MetronomeUI() {
               <Typography 
                 sx={{ 
                   position: 'absolute', 
-                  top: 20, 
+                  top: { xs: 15, sm: 18, md: 20 }, 
                   left: '50%', 
                   transform: 'translateX(-50%)',
                   color: 'rgba(255,255,255,0.6)',
@@ -798,7 +798,7 @@ export default function MetronomeUI() {
               <Typography 
                 sx={{ 
                   position: 'absolute', 
-                  right: 20, 
+                  right: { xs: 15, sm: 18, md: 20 }, 
                   top: '50%', 
                   transform: 'translateY(-50%)',
                   color: 'rgba(255,255,255,0.6)',
@@ -811,7 +811,7 @@ export default function MetronomeUI() {
               <Typography 
                 sx={{ 
                   position: 'absolute', 
-                  bottom: 20, 
+                  bottom: { xs: 15, sm: 18, md: 20 }, 
                   left: '50%', 
                   transform: 'translateX(-50%)',
                   color: 'rgba(255,255,255,0.6)',
@@ -841,13 +841,13 @@ export default function MetronomeUI() {
                 boxShadow: isPlaying
                   ? '0 0 20px rgba(74, 222, 128, 0.4), 0 6px 12px rgba(0,0,0,0.25)'
                   : '0 6px 12px rgba(0,0,0,0.25)',
-                p: 3,
+                p: { xs: 2, sm: 2.5, md: 2.75 },
                 transition: 'all 0.3s ease'
               }}
             >
               {isPlaying ? 
-                <StopIcon sx={{ fontSize: 34, color: '#ffffff' }} /> : 
-                <PlayArrowIcon sx={{ fontSize: 34, color: '#1b4332' }} />
+                <StopIcon sx={{ fontSize: { xs: 26, sm: 30, md: 32 }, color: '#ffffff' }} /> : 
+                <PlayArrowIcon sx={{ fontSize: { xs: 26, sm: 30, md: 32 }, color: '#1b4332' }} />
               }
             </IconButton>
           </Box>
